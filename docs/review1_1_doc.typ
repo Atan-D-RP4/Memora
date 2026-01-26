@@ -505,87 +505,6 @@ To optimize query performance, strategic indexes are created on:
 - Topic: `{ title: 'text', content: 'text' }` for full-text search
 - RevisionHistory: `{ userId: 1, topicId: 1, revisionDate: -1 }` for history queries
 
-#heading(level: 2)[Data Flow]
-
-Memora's data flow follows a clear, secure pattern from user interaction through API processing to database storage and back.
-
-*Authentication Flow*:
-
-1. User submits credentials via login form
-2. Frontend validates input format
-3. ApiService sends POST request to `/api/auth/login`
-4. Backend validates credentials, bcrypt compares hashed password
-5. On success, server generates JWT access token (15 min) and refresh token (7 days)
-6. Tokens returned to client and stored in localStorage
-7. AuthContext updates with user data
-8. Future API requests include access token in Authorization header
-9. When access token expires, ApiService automatically uses refresh token to obtain new access token
-10. On logout, backend invalidates refresh token and frontend clears localStorage
-
-*Topic Creation Flow*:
-
-1. User fills out topic creation form
-2. Frontend validates required fields (title, content, difficulty)
-3. ApiService sends POST request to `/api/topics` with topic data
-4. Backend auth middleware verifies JWT token
-5. Express-validator validates input constraints
-6. Topic model creates new document with:
-   - User-provided content fields
-   - Initial spaced repetition values (easeFactor: 2.5, interval: 1, repetitions: 0)
-   - nextReviewDate calculated based on difficulty
-7. Document saved to MongoDB
-8. Success response with created topic returned to frontend
-9. Frontend updates local state and UI displays new topic
-
-*Review Submission Flow*:
-
-1. User completes topic review and rates performance (1-5)
-2. Frontend sends POST to `/api/topics/:id/review` with quality rating
-3. Backend retrieves topic from database
-4. SM-2 algorithm method updates:
-   - Increments reviewCount
-   - Updates lastReviewed timestamp
-   - Recalculates easeFactor based on quality rating
-   - Computes next interval using enhanced SM-2 formula
-   - Sets nextReviewDate = now + interval days
-   - Updates averagePerformance running average
-5. Updated topic saved to database
-6. Revision history record created
-7. Response returns updated topic and next review date
-8. Frontend updates UI, showing next review date and statistics
-
-*MemScore Evaluation Flow*:
-
-1. User completes all three MemScore tests sequentially
-2. Frontend calculates scores locally:
-   - Memory Game: `max(0, 10 - wrongAttempts)`
-   - Tile Recall: `2 points per correct round - 0.5 per mistake`
-   - Processing Speed: `(correct / total) × 10`
-   - Overall: `average of three scores`
-3. Results posted to `/api/user/evaluation`
-4. Backend validates score ranges (0-10 for each test)
-5. User document updated with:
-   - memScore = overallScore (scaled to 0-100)
-   - evaluationResults object with all scores
-   - hasCompletedEvaluation = true
-   - lastMemScoreUpdate = current timestamp
-6. Success response confirms save
-7. Frontend updates AuthContext with new memScore
-8. Dashboard displays updated cognitive profile
-
-*Crowding Prevention Flow*:
-
-1. User requests crowding prevention or system runs automatically
-2. Backend queries topics for next 14 days grouped by date
-3. For each day, calculate difficulty-weighted topic count
-4. Identify days exceeding threshold (adjusted by average difficulty)
-5. For crowded days, select topics for redistribution (prioritizing high difficulty)
-6. Find alternative dates within ±3 to +7 day range with available capacity
-7. Update nextReviewDate for redistributed topics
-8. Increment rescheduleCount for tracking
-9. Return updated schedule to frontend
-10. UI displays notification of schedule optimization
-
 #heading(level: 2)[API Endpoint Specifications]
 
 The RESTful API follows standard HTTP conventions with JSON request/response bodies.
@@ -661,6 +580,14 @@ The RESTful API follows standard HTTP conventions with JSON request/response bod
 - `GET /workload`: Get daily topic workload for crowding analysis
   - Query: `?days=14`
   - Response: `{ success, workload: [{ date, count, averageDifficulty, crowdingLevel, isCrowded, thresholds }] }`
+
+#heading(level: 2)[Entity-Relationship Diagrams]
+
+#heading(level: 3)[Simplified ER Diagram]
+#image("simple_erd.png")
+
+#heading(level: 3)[Detailed ER Diagram]
+#image("erd.png")
 
 #pagebreak()
 
@@ -1094,6 +1021,29 @@ The project demonstrates the practical application of cognitive science research
 Memora has the potential to significantly improve learning outcomes for students and professionals by automating the complex task of review scheduling while providing personalized feedback and motivation. By making spaced repetition accessible and engaging, the platform addresses a critical gap between what cognitive science tells us works and what tools are available for everyday learners.
 
 #pagebreak()
+
+#heading(level: 1)[Gallery]
+
+#image("ui1.png")
+#image("ui2.png")
+#image("ui3.png")
+#image("ui4.png")
+#image("ui5.png")
+
+#heading(level: 1)[References]
+
+// Tech stack and libraries docs
+- Unbounded Human Learning: Optimal Scheduling for Spaced Repetition arXiv:1602.07032 [cs.AI]
+- Amazon mechanical turk. https://www.mturk.com, 2005.
+- Duolingo. https://www.duolingo.com, 2011.
+- Spaced repetition. http://www.gwern.net/Spaced%20repetition, 2016.
+- N. J. Cepeda, H. Pashler, E. Vul, J. T. Wixted, and D. Rohrer. Distributed
+  practice in verbal recall tasks: A review and quantitative synthesis.
+  Psychological bulletin, 132(3):354, 2006.
+- React. https://reactjs.org.
+- Vite. https://vitejs.dev.
+- Tailwind CSS. https://tailwindcss.com.
+- Framer Motion. https://www.framer.com/motion/.
 
 #heading(level: 1)[Appendix A: Technology Stack Summary]
 
