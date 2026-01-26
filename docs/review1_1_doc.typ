@@ -604,3 +604,688 @@ The RESTful API follows standard HTTP conventions with JSON request/response bod
 - `POST /logout`: Invalidate refresh token
   - Request: `{ refreshToken }`
   - Response: `{ success, message, data: null }`
+
+- `POST /refresh`: Refresh access token
+  - Request: `{ refreshToken }`
+  - Response: `{ success, tokens: { accessToken, refreshToken } }`
+
+- `GET /verify`: Verify current token and get user info
+  - Headers: `Authorization: Bearer <accessToken>`
+  - Response: `{ success, user: { id, username, email, memScore, ... } }`
+
+*User Endpoints* (`/api/user/`):
+
+- `GET /profile`: Get user profile
+  - Response: `{ success, user: { ... } }`
+
+- `PUT /profile`: Update user profile
+  - Request: `{ preferences: { colorTheme, defaultDifficulty, retentionSpeed } }`
+  - Response: `{ success, user: { ... } }`
+
+- `POST /evaluation`: Save MemScore evaluation results
+  - Request: `{ memoryGame, tileRecall, processingSpeed, overallScore }`
+  - Response: `{ success, memScore: number }`
+
+- `POST /study-session`: Record study session for streak tracking
+  - Response: `{ success, currentStreak, longestStreak, totalStudyDays, isNewRecord }`
+
+*Topics Endpoints* (`/api/topics/`):
+
+- `GET /`: Get user's topics with filtering
+  - Query: `?category=Science&difficulty=3&search=keyword&limit=50&page=1`
+  - Response: `{ success, topics: [...], pagination: { page, limit, total, pages } }`
+
+- `GET /due`: Get topics due for review today
+  - Query: `?limit=10`
+  - Response: `{ success, topics: [...], todaysCount, overdueCount, count }`
+
+- `GET /upcoming`: Get upcoming topics for review
+  - Query: `?days=7&limit=20`
+  - Response: `{ success, topics: [...], count }`
+
+- `POST /`: Create new topic
+  - Request: `{ title, content, difficulty, category, tags, externalLinks, attachments }`
+  - Response: `{ success, topic: {...}, crowdingPrevention: {...} }`
+
+- `POST /:id/review`: Submit topic review with performance rating
+  - Request: `{ quality: 1-5, responseTime?: number }`
+  - Response: `{ success, topic: { nextReviewDate, interval, easeFactor, repetitions }, crowdingPrevention }`
+
+- `POST /:id/skip`: Skip topic for today (postpone by 1 day with collision avoidance)
+  - Response: `{ success, message, topic: { nextReviewDate } }`
+
+- `POST /prevent-crowding`: Redistribute topics to prevent crowding
+  - Request: `{ targetDate: ISO date string }`
+  - Response: `{ success, redistributed, count, details: [...] }`
+
+- `GET /workload`: Get daily topic workload for crowding analysis
+  - Query: `?days=14`
+  - Response: `{ success, workload: [{ date, count, averageDifficulty, crowdingLevel, isCrowded, thresholds }] }`
+
+#pagebreak()
+
+#heading(level: 1)[Implementation Details]
+
+#heading(level: 2)[SM-2 Spaced Repetition Algorithm]
+
+The core of Memora's learning system is an enhanced implementation of the SuperMemo SM-2 algorithm, adapted for web-based delivery with additional features for crowding prevention and difficulty-based load balancing.
+
+*Algorithm Foundation*:
+
+The SM-2 algorithm uses an ease factor to model how easily a user remembers each topic. After each review, the algorithm updates the ease factor based on the user's self-reported performance quality (0-5 scale), then calculates the optimal interval before the next review.
+
+*Mathematical Implementation*:
+
+```javascript
+// Quality ratings: 0-5 scale
+// 0 = complete blackout, 5 = perfect response
+
+function updateSpacedRepetition(quality) {
+  this.reviewCount += 1;
+  this.lastReviewed = new Date();
+
+  if (quality < 3) {
+    // Reset learning for poor performance
+    this.repetitions = 0;
+    this.interval = 1;
+    this.isLearning = true;
+  } else {
+    // Update ease factor using SM-2 formula
+    this.easeFactor = Math.max(
+      1.3,
+      this.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+    );
+
+    // Calculate next interval
+    if (this.repetitions === 0) {
+      this.interval = 1;  // First successful review: 1 day
+    } else if (this.repetitions === 1) {
+      this.interval = 6;  // Second successful review: 6 days
+    } else {
+      this.interval = Math.round(this.interval * this.easeFactor);
+    }
+
+    this.repetitions += 1;
+
+    // Mark as learned after successful repetitions
+    if (this.repetitions >= 3 && quality >= 4) {
+      this.isLearning = false;
+    }
+  }
+
+  // Set next review date
+  this.nextReviewDate = new Date(
+    Date.now() + this.interval * 24 * 60 * 60 * 1000
+  );
+
+  // Update average performance (running average)
+  const totalPerformance = (this.averagePerformance * (this.reviewCount - 1))
+                           + (quality / 5);
+  this.averagePerformance = totalPerformance / this.reviewCount;
+}
+```
+
+*Key Parameters*:
+
+- *Ease Factor (EF)*: Initial value 2.5, minimum 1.3. Higher EF means longer intervals.
+- *Interval*: Days until next review. Increases multiplicatively with each successful review.
+- *Repetitions*: Count of consecutive successful reviews (quality ≥ 3).
+- *isLearning*: True until user demonstrates mastery (≥3 repetitions with quality ≥4).
+
+*Interval Progression Example*:
+
+For a topic with default ease factor (2.5) and consistent good performance (quality = 4):
+- After 1st review: 1 day
+- After 2nd review: 6 days
+- After 3rd review: 15 days (6 × 2.5)
+- After 4th review: 38 days (15 × 2.5)
+- After 5th review: 95 days (38 × 2.5)
+
+#heading(level: 2)[Crowding Prevention Algorithm]
+
+To prevent overwhelming study sessions, Memora implements an intelligent topic redistribution system that considers both topic count and difficulty levels.
+
+*Difficulty-Based Thresholds*:
+
+```javascript
+const baseThresholds = {
+  light: 2,    // 1-2 topics
+  medium: 3,   // 3 topics
+  heavy: 4,    // 4 topics
+  crowded: 5   // 5+ topics (requires redistribution)
+};
+
+const difficultyMultipliers = {
+  1: 1.4,   // Easy: can handle 40% more
+  2: 1.2,   // Below Medium: can handle 20% more
+  3: 1.0,   // Medium: base thresholds
+  4: 0.8,   // Hard: reduce by 20%
+  5: 0.6    // Expert: reduce by 40%
+};
+```
+
+*Redistribution Logic*:
+
+1. Analyze daily topic counts with difficulty weighting for the next 14 days
+2. Identify crowded days (exceeding difficulty-adjusted thresholds)
+3. For each crowded day:
+   - Calculate maximum allowed topics based on average difficulty
+   - Select excess topics, prioritizing higher difficulty ones
+   - Find alternative dates within ±3 to +7 day range
+   - Prefer dates with lower existing load
+4. Update nextReviewDate for redistributed topics
+5. Increment rescheduleCount for tracking
+
+*Alternative Date Selection*:
+
+```javascript
+// For each candidate date
+const loadScore = currentCount + (currentAvgDifficulty / 5);
+
+// Sort alternatives by:
+// 1. Priority (closer dates first)
+// 2. Load score (less loaded first)
+alternatives.sort((a, b) => {
+  if (a.priority !== b.priority) return a.priority - b.priority;
+  return a.loadScore - b.loadScore;
+});
+```
+
+#heading(level: 2)[MemScore Cognitive Assessment]
+
+The MemScore evaluation system comprises three distinct cognitive tests, each measuring different aspects of cognitive function.
+
+*Test 1: Memory Game*
+
+Card matching task measuring visual working memory and recognition:
+- Grid size: 4×4 (16 cards, 8 pairs)
+- Preview phase: 10 seconds showing all cards
+- Scoring: `score = max(0, 10 - wrongAttempts)`
+- Skills tested: Encoding, pattern recognition, spatial memory
+
+*Test 2: Tile Recall*
+
+Progressive spatial memory test measuring sequential memory capacity:
+- Grid size: 5×5 (25 tiles)
+- Rounds: 5 with increasing difficulty
+- Sequence lengths: 3 → 4 → 5 → 6 → 7 tiles per round
+- Show times: 3000ms → 2700ms → 2400ms → 2100ms → 2800ms (extra time for final round)
+- Scoring: 2 points per correct round, -0.5 penalty per mistake
+- Maximum score: 10 points
+
+*Test 3: Processing Speed*
+
+Rapid arithmetic measuring cognitive efficiency:
+- Duration: 30 seconds
+- Operations: Addition, subtraction, multiplication
+- Number range: 1-50 for addition/subtraction, 1-12 for multiplication
+- Scoring: `(correctAnswers / totalQuestions) × 10`
+
+*Overall MemScore Calculation*:
+
+```javascript
+overallScore = Math.round(
+  (memoryGameScore + tileRecallScore + processingSpeedScore) / 3
+);
+// Result: Integer from 0-10, displayed as percentage (0-100) in UI
+```
+
+#heading(level: 2)[Authentication System]
+
+Memora implements a secure, stateless authentication system using JSON Web Tokens (JWT) with refresh token rotation.
+
+*Security Features*:
+
+1. *Password Hashing*: bcrypt with 12 salt rounds
+2. *Token Expiration*: Access tokens expire after 15 minutes, refresh tokens after 7 days
+3. *Token Rotation*: New refresh token issued on each refresh request
+4. *Token Limit*: Maximum 5 refresh tokens per user (oldest removed when exceeded)
+5. *Automatic Cleanup*: Expired tokens removed from database
+
+*JWT Payload Structure*:
+
+```javascript
+// Access Token Payload
+{
+  id: userId,
+  username: username,
+  email: email,
+  iat: issuedAt,
+  exp: expiresIn15Minutes
+}
+
+// Refresh Token Payload
+{
+  id: userId,
+  iat: issuedAt,
+  exp: expiresIn7Days
+}
+```
+
+*Token Flow*:
+
+1. User authenticates → Server generates access + refresh tokens
+2. Client stores tokens in localStorage
+3. API requests include access token in Authorization header
+4. When access token expires (401 response), client uses refresh token to obtain new pair
+5. On logout, refresh token is invalidated server-side
+
+#heading(level: 2)[Frontend Component Architecture]
+
+The React frontend follows a component-based architecture with clear separation between pages, reusable components, and utility modules.
+
+*Core Components*:
+
+- *CyberGrid.jsx*: Interactive animated background with mouse-tracking gradients
+- *AuthContext.jsx*: Global authentication state with useReducer pattern
+- *TimerContext.jsx*: Focus session timer with global state
+- *ApiService*: Singleton class handling all API communication with automatic token refresh
+
+*Page Components*:
+
+| Page | Purpose | Key Features |
+|------|---------|--------------|
+| Dashboard | Main interface | Topic management, review queue, 7-day preview |
+| MemScoreEvaluation | Cognitive assessment | Three-phase testing with scoring |
+| Topics | Topic library | CRUD operations, filtering, search |
+| FocusMode | Concentrated study | Timer, distraction-free interface |
+| Journal | Activity log | Daily entries, performance tracking |
+| Chronicle | Calendar view | Review schedule visualization |
+| Profile | User settings | Preferences, streak display |
+
+*State Management Pattern*:
+
+```javascript
+// AuthContext reducer pattern
+const AUTH_ACTIONS = {
+  LOGIN_START: 'LOGIN_START',
+  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
+  LOGIN_FAILURE: 'LOGIN_FAILURE',
+  LOGOUT: 'LOGOUT',
+  SET_USER: 'SET_USER',
+  SET_LOADING: 'SET_LOADING',
+  CLEAR_ERROR: 'CLEAR_ERROR'
+};
+
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case AUTH_ACTIONS.LOGIN_SUCCESS:
+      return { ...state, user: action.payload.user, isAuthenticated: true };
+    // ... other cases
+  }
+};
+```
+
+#pagebreak()
+
+#heading(level: 1)[Testing Considerations]
+
+#heading(level: 2)[Unit Testing Areas]
+
+Key areas requiring unit test coverage:
+
+1. *Spaced Repetition Algorithm*:
+   - Ease factor updates for all quality ratings (0-5)
+   - Interval calculations at different repetition counts
+   - Reset behavior for quality < 3
+   - isLearning flag transitions
+
+2. *MemScore Calculations*:
+   - Memory game scoring with various wrong attempt counts
+   - Tile recall scoring across all rounds
+   - Processing speed percentage calculations
+   - Overall score averaging
+
+3. *Authentication*:
+   - Password validation rules
+   - Token generation and verification
+   - Refresh token rotation
+   - Token expiration handling
+
+4. *Crowding Prevention*:
+   - Threshold calculations with different difficulty averages
+   - Topic selection prioritization
+   - Alternative date finding
+   - Redistribution limits
+
+#heading(level: 2)[Integration Testing]
+
+End-to-end flows requiring integration tests:
+
+1. *Complete Authentication Cycle*:
+   - Registration → Login → Token refresh → Logout
+   - Invalid credential handling
+   - Session persistence across page reloads
+
+2. *Topic Lifecycle*:
+   - Create → Review → Schedule update → Delete
+   - Filtering and pagination
+   - Search functionality
+
+3. *MemScore Flow*:
+   - All three tests in sequence
+   - Score persistence to database
+   - Dashboard update after completion
+
+4. *Crowding Prevention*:
+   - Detection of crowded days
+   - Redistribution execution
+   - UI notification updates
+
+#heading(level: 2)[Performance Metrics]
+
+Key performance indicators to monitor:
+
+- *API Response Times*: Target < 200ms for standard queries
+- *Database Query Performance*: Indexed queries < 50ms
+- *Frontend Render Times*: First Contentful Paint < 1.5s
+- *Animation Frame Rate*: Maintain 60fps for Framer Motion animations
+
+#pagebreak()
+
+#heading(level: 1)[Deployment Considerations]
+
+#heading(level: 2)[Environment Configuration]
+
+*Production Environment Variables*:
+
+```env
+# Server
+PORT=3001
+NODE_ENV=production
+
+# Database
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/memora
+
+# Security
+JWT_SECRET=<secure-random-256-bit-key>
+JWT_REFRESH_SECRET=<different-secure-random-key>
+BCRYPT_SALT_ROUNDS=12
+
+# CORS
+FRONTEND_URL=https://memora.yourdomain.com
+```
+
+#heading(level: 2)[Security Hardening]
+
+Production security measures:
+
+1. *Enable Rate Limiting*: Uncomment rate limiter in server.js (100 requests per 15 minutes)
+2. *Strict CORS*: Remove localhost from allowed origins
+3. *HTTPS Only*: Enforce TLS for all connections
+4. *Secure Headers*: Helmet.js enabled by default
+5. *Environment Secrets*: Never commit secrets to version control
+
+#heading(level: 2)[Scalability Considerations]
+
+Architecture supports horizontal scaling:
+
+- *Stateless Backend*: JWT authentication enables multiple server instances
+- *Database Indexing*: Strategic indexes on high-query fields
+- *API Separation*: Frontend and backend can be deployed independently
+- *CDN Integration*: Static assets can be served from CDN
+
+#pagebreak()
+
+#heading(level: 1)[Future Enhancements]
+
+#heading(level: 2)[Planned Features]
+
+1. *ReviseBy*: Deadline management system for exam preparation
+   - Set target dates for mastery
+   - Automatic schedule optimization
+   - Progress tracking toward deadlines
+
+2. *Chronicle Enhancement*: Full calendar view for review scheduling
+   - Drag-and-drop rescheduling
+   - Weekly/monthly views
+   - Integration with external calendars
+
+3. *DocTags System*: Enhanced attachment capabilities
+   - PDF document viewing
+   - YouTube video embedding
+   - Google Drive integration
+   - Automatic content extraction
+
+4. *Difficulty Matrix*: Smart topic load balancing
+   - Visual difficulty distribution
+   - Automatic rebalancing suggestions
+   - Performance-based difficulty adjustment
+
+5. *Performance Analytics*: Advanced progress tracking
+   - Learning curve visualization
+   - Retention rate graphs
+   - Comparative performance metrics
+
+#heading(level: 2)[Technical Improvements]
+
+1. *Testing Suite*: Comprehensive Jest + React Testing Library coverage
+2. *Performance Optimization*: React.memo, useMemo, code splitting
+3. *Offline Support*: Service worker for offline functionality
+4. *Mobile Application*: React Native cross-platform app
+5. *Real-time Sync*: WebSocket for multi-device synchronization
+
+#pagebreak()
+
+#heading(level: 1)[Conclusion]
+
+Memora represents a comprehensive solution to the challenges of effective learning and memory retention. By combining the scientifically-validated SM-2 spaced repetition algorithm with modern web technologies and innovative features like cognitive assessment and crowding prevention, the platform provides a personalized, intelligent learning experience.
+
+*Key Achievements*:
+
+1. *Scientific Foundation*: Implementation of the SM-2 algorithm with enhancements for real-world usage
+2. *Cognitive Assessment*: Multi-faceted MemScore evaluation providing personalized learning profiles
+3. *Intelligent Scheduling*: Crowding prevention with difficulty-weighted load balancing
+4. *Modern Architecture*: Scalable MERN stack with secure authentication and responsive design
+5. *User Experience*: Cyber-grid aesthetic with smooth animations and distraction-free learning
+
+*Technical Highlights*:
+
+- Full-stack JavaScript implementation with React 19 and Express.js
+- MongoDB database with Mongoose ODM and strategic indexing
+- JWT authentication with refresh token rotation
+- Responsive design with Tailwind CSS and Framer Motion animations
+- RESTful API with comprehensive input validation
+
+The project demonstrates the practical application of cognitive science research to educational technology, providing a foundation for continued development and enhancement. Future iterations will expand functionality while maintaining the core focus on scientifically-backed learning optimization.
+
+*Impact Statement*:
+
+Memora has the potential to significantly improve learning outcomes for students and professionals by automating the complex task of review scheduling while providing personalized feedback and motivation. By making spaced repetition accessible and engaging, the platform addresses a critical gap between what cognitive science tells us works and what tools are available for everyday learners.
+
+#pagebreak()
+
+#heading(level: 1)[Appendix A: Technology Stack Summary]
+
+#heading(level: 2)[Frontend Technologies]
+
+#table(
+  columns: (1fr, 2fr, 1fr),
+  align: left,
+  table.header(
+    [*Technology*], [*Purpose*], [*Version*]
+  ),
+  [React], [UI Framework - Component-based architecture], [19.1.0],
+  [Vite], [Build Tool - Fast development server and bundling], [7.0.4],
+  [Tailwind CSS], [Styling - Utility-first CSS framework], [4.1.11],
+  [Framer Motion], [Animations - React animation library], [12.23.6],
+  [React Router], [Navigation - Client-side routing], [7.7.0],
+  [Axios], [HTTP Client - API communication], [1.10.0],
+  [Lucide React], [Icons - Consistent icon library], [0.525.0],
+  [Marked], [Markdown - Content rendering], [16.1.2],
+)
+
+#heading(level: 2)[Backend Technologies]
+
+#table(
+  columns: (1fr, 2fr, 1fr),
+  align: left,
+  table.header(
+    [*Technology*], [*Purpose*], [*Version*]
+  ),
+  [Express.js], [Web Framework - HTTP server and routing], [4.18.2],
+  [MongoDB], [Database - Document-oriented NoSQL storage], [Latest],
+  [Mongoose], [ODM - Schema-based MongoDB modeling], [8.16.4],
+  [jsonwebtoken], [Authentication - JWT token handling], [9.0.2],
+  [bcryptjs], [Security - Password hashing], [3.0.2],
+  [Helmet], [Security - HTTP headers protection], [8.1.0],
+  [express-validator], [Validation - Input sanitization], [7.2.1],
+  [Multer], [File Upload - Multipart form handling], [1.4.5-lts.1],
+  [CORS], [Security - Cross-origin resource sharing], [2.8.5],
+)
+
+#heading(level: 2)[Development Tools]
+
+#table(
+  columns: (1fr, 2fr),
+  align: left,
+  table.header(
+    [*Tool*], [*Purpose*]
+  ),
+  [ESLint], [Code Quality - Linting and style enforcement],
+  [Nodemon], [Development - Auto-restart on file changes],
+  [PostCSS], [CSS Processing - Tailwind integration],
+  [Autoprefixer], [CSS - Browser compatibility prefixes],
+  [Git], [Version Control - Source code management],
+)
+
+#pagebreak()
+
+#heading(level: 1)[Appendix B: Database Schema Reference]
+
+#heading(level: 2)[User Collection Schema]
+
+```javascript
+{
+  username: String (unique, 3-30 chars, alphanumeric + underscore),
+  email: String (unique, lowercase, validated format),
+  password: String (bcrypt hashed, excluded from queries),
+  memScore: Number (0-10),
+  preferences: {
+    colorTheme: String ("monochrome" | "neon-blue" | "neon-green"),
+    defaultDifficulty: Number (1-5),
+    retentionSpeed: String ("fast" | "medium" | "slow"),
+    memScoreRecalibrationFreq: Number (1-365 days)
+  },
+  hasCompletedEvaluation: Boolean,
+  evaluationResults: {
+    memoryGame: Number,
+    tileRecall: Number,
+    processingSpeed: Number,
+    overallScore: Number,
+    completedAt: Date
+  },
+  refreshTokens: [{ token: String, createdAt: Date, expiresAt: Date }],
+  currentStreak: Number,
+  longestStreak: Number,
+  lastStudyDate: Date,
+  totalStudyDays: Number,
+  isActive: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#heading(level: 2)[Topic Collection Schema]
+
+```javascript
+{
+  title: String (max 200 chars),
+  content: String (max 10000 chars),
+  userId: ObjectId (ref: User),
+  tags: [String],
+  difficulty: Number (1-5),
+  learnedDate: Date,
+  category: String (Science|Mathematics|History|Language|Technology|Arts|Business|Other),
+  attachments: [{
+    filename: String,
+    originalName: String,
+    mimetype: String,
+    size: Number,
+    url: String,
+    uploadedAt: Date
+  }],
+  externalLinks: [{
+    title: String,
+    url: String,
+    type: String (youtube|google_drive|notion|github|website|file|other),
+    description: String,
+    addedAt: Date
+  }],
+  isActive: Boolean,
+  lastReviewed: Date,
+  reviewCount: Number,
+  averagePerformance: Number (0-1),
+  easeFactor: Number (min 1.3, default 2.5),
+  interval: Number (min 1 day),
+  repetitions: Number,
+  nextReviewDate: Date,
+  isLearning: Boolean,
+  rescheduleCount: Number,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#heading(level: 2)[Database Indexes]
+
+```javascript
+// User Collection Indexes
+{ email: 1 }           // Login queries
+{ username: 1 }        // Username lookups
+{ createdAt: -1 }      // Chronological sorting
+
+// Topic Collection Indexes
+{ userId: 1, createdAt: -1 }      // User topic lists
+{ userId: 1, nextReviewDate: 1 }  // Due topics queries
+{ userId: 1, isActive: 1 }        // Active topic filtering
+{ userId: 1, category: 1 }        // Category filtering
+{ tags: 1 }                       // Tag-based queries
+{ title: 'text', content: 'text' } // Full-text search
+```
+
+#pagebreak()
+
+#heading(level: 1)[Appendix C: Project Statistics]
+
+#heading(level: 2)[Codebase Metrics]
+
+#table(
+  columns: (1fr, 1fr),
+  align: left,
+  table.header(
+    [*Metric*], [*Value*]
+  ),
+  [Total Files], [~100 files],
+  [Frontend Components], [20+ React components],
+  [Frontend Pages], [13 page components],
+  [Backend Routes], [5 route modules],
+  [Database Models], [5 Mongoose schemas],
+  [API Endpoints], [25+ endpoints],
+  [Lines of Code (Frontend)], [~8,000 lines],
+  [Lines of Code (Backend)], [~2,500 lines],
+)
+
+#heading(level: 2)[Feature Coverage]
+
+#table(
+  columns: (1fr, 1fr, 2fr),
+  align: left,
+  table.header(
+    [*Feature*], [*Status*], [*Description*]
+  ),
+  [User Authentication], [Complete], [JWT with refresh token rotation],
+  [Topic Management], [Complete], [Full CRUD with attachments],
+  [Spaced Repetition], [Complete], [SM-2 algorithm implementation],
+  [Cognitive Assessment], [Complete], [3-part MemScore evaluation],
+  [Crowding Prevention], [Complete], [Difficulty-based redistribution],
+  [Study Streaks], [Complete], [Daily tracking with records],
+  [Focus Mode], [Complete], [Timer and distraction-free UI],
+  [Journal], [Complete], [Activity logging and daily entries],
+  [Chronicle], [Partial], [Calendar view (basic)],
+  [Analytics], [Partial], [Basic performance metrics],
+  [DocTags], [Partial], [File attachment system],
+  [ReviseBy], [Planned], [Deadline management],
+  [Mobile App], [Planned], [React Native implementation],
+  [Offline Support], [Planned], [Service worker integration],
+)
