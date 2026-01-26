@@ -1,8 +1,8 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
@@ -13,94 +13,98 @@ app.use(helmet());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
+  origin: "http://localhost:5173",
+  credentials: true,
 }));
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection (optional for development)
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect('mongodb://localhost:27017/memora');
+    const conn = await mongoose.connect("mongodb://localhost:27017/memora");
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     return true;
   } catch (error) {
-    console.warn('⚠️  MongoDB connection failed. Running in development mode without database.');
-    console.warn('To use full functionality, please start MongoDB or provide a valid MONGODB_URI');
+    console.warn(
+      "⚠️  MongoDB connection failed. Running in development mode without database.",
+    );
+    console.warn(
+      "To use full functionality, please start MongoDB or provide a valid MONGODB_URI",
+    );
     return false;
   }
 };
 
 // Connect to database (non-blocking for development)
 let dbConnected = false;
-connectDB().then(connected => {
+connectDB().then((connected) => {
   dbConnected = connected;
 });
 
 // Health check route
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Memora Backend API is running',
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Memora Backend API is running",
     timestamp: new Date().toISOString(),
     port: 8080,
-    database: dbConnected ? 'connected' : 'disconnected'
+    database: dbConnected ? "connected" : "disconnected",
   });
 });
 
 // Mock authentication routes for development
-app.post('/api/auth/register', (req, res) => {
-  console.log('📝 Register request:', req.body);
-  
+app.post("/api/auth/register", (req, res) => {
+  console.log("📝 Register request:", req.body);
+
   // Simulate validation
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Username, email, and password are required'
+      message: "Username, email, and password are required",
     });
   }
 
   // Simulate successful registration
-  res.status(201).json({ 
-    success: true, 
-    message: 'User registered successfully',
-    user: { 
-      id: Date.now(), 
-      email: email.toLowerCase(), 
+  res.status(201).json({
+    success: true,
+    message: "User registered successfully",
+    user: {
+      id: Date.now(),
+      email: email.toLowerCase(),
       username: username,
       memScore: 0,
       hasCompletedEvaluation: false,
       preferences: {
-        colorTheme: 'monochrome',
+        colorTheme: "monochrome",
         defaultDifficulty: 3,
-        retentionSpeed: 'medium'
-      }
+        retentionSpeed: "medium",
+      },
     },
     tokens: {
-      accessToken: 'mock-jwt-access-token-' + Date.now(),
-      refreshToken: 'mock-jwt-refresh-token-' + Date.now()
-    }
+      accessToken: "mock-jwt-access-token-" + Date.now(),
+      refreshToken: "mock-jwt-refresh-token-" + Date.now(),
+    },
   });
 });
 
-app.post('/api/auth/login', (req, res) => {
-  console.log('🔐 Login request:', req.body);
-  
+app.post("/api/auth/login", (req, res) => {
+  console.log("🔐 Login request:", req.body);
+
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: 'Email and password are required'
+      message: "Email and password are required",
     });
   }
 
@@ -110,58 +114,58 @@ app.post('/api/auth/login', (req, res) => {
   // Simulate successful login
   res.json({
     success: true,
-    message: 'Login successful',
+    message: "Login successful",
     user: {
-      id: 'harsith',
+      id: "harsith",
       email: email.toLowerCase(),
-      username: 'Harsith',
+      username: "Harsith",
       memScore: memScore,
       hasCompletedEvaluation: true,
       currentStreak: 0,
       longestStreak: 0,
       totalStudyDays: 0,
       preferences: {
-        colorTheme: 'monochrome',
+        colorTheme: "monochrome",
         defaultDifficulty: 3,
-        retentionSpeed: 'medium'
+        retentionSpeed: "medium",
       },
-      lastLogin: new Date().toISOString()
+      lastLogin: new Date().toISOString(),
     },
     tokens: {
-      accessToken: 'mock-jwt-access-token-' + Date.now(),
-      refreshToken: 'mock-jwt-refresh-token-' + Date.now()
-    }
+      accessToken: "mock-jwt-access-token-" + Date.now(),
+      refreshToken: "mock-jwt-refresh-token-" + Date.now(),
+    },
   });
 });
 
-app.post('/api/auth/logout', (req, res) => {
-  console.log('👋 Logout request');
-  res.json({ 
-    success: true, 
-    message: 'Logged out successfully'
+app.post("/api/auth/logout", (req, res) => {
+  console.log("👋 Logout request");
+  res.json({
+    success: true,
+    message: "Logged out successfully",
   });
 });
 
-app.get('/api/auth/verify', (req, res) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
+app.get("/api/auth/verify", (req, res) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: 'Access token required'
+      message: "Access token required",
     });
   }
 
   // Mock token verification - only allow veeracharan99@gmail.com
-  const email = 'veeracharan99@gmail.com'; // Only your account
+  const email = "veeracharan99@gmail.com"; // Only your account
   const memScore = 7.0;
 
   res.json({
     success: true,
     user: {
-      id: 'harsith',
-      username: 'Harsith',
+      id: "harsith",
+      username: "Harsith",
       email: email,
       memScore: memScore,
       hasCompletedEvaluation: true,
@@ -169,30 +173,30 @@ app.get('/api/auth/verify', (req, res) => {
       longestStreak: 0,
       totalStudyDays: 0,
       preferences: {
-        colorTheme: 'monochrome',
+        colorTheme: "monochrome",
         defaultDifficulty: 3,
-        retentionSpeed: 'medium'
-      }
-    }
+        retentionSpeed: "medium",
+      },
+    },
   });
 });
 
 // Mock evaluation results endpoint
-app.post('/api/user/evaluation', (req, res) => {
-  console.log('📊 Evaluation results:', req.body);
+app.post("/api/user/evaluation", (req, res) => {
+  console.log("📊 Evaluation results:", req.body);
 
   const { memoryGame, tileRecall, processingSpeed, overallScore } = req.body;
 
   res.json({
     success: true,
-    message: 'Evaluation results saved successfully',
+    message: "Evaluation results saved successfully",
     results: {
       memoryGame,
       tileRecall,
       processingSpeed,
       overallScore,
-      completedAt: new Date().toISOString()
-    }
+      completedAt: new Date().toISOString(),
+    },
   });
 });
 
@@ -201,39 +205,43 @@ let mockTopics = [];
 let topicIdCounter = 1;
 
 // Mock topics endpoints
-app.get('/api/topics', (req, res) => {
-  console.log('📚 Getting all topics');
+app.get("/api/topics", (req, res) => {
+  console.log("📚 Getting all topics");
   setTimeout(() => {
     res.json({
       success: true,
       topics: mockTopics,
-      count: mockTopics.length
+      count: mockTopics.length,
     });
   }, 500); // Reduced delay from 10 seconds to 0.5 seconds
 });
 
-app.get('/api/topics/due', (req, res) => {
-  console.log('📅 Getting due topics');
-  const dueTopics = mockTopics.filter(topic => new Date(topic.nextReviewDate) <= new Date());
+app.get("/api/topics/due", (req, res) => {
+  console.log("📅 Getting due topics");
+  const dueTopics = mockTopics.filter((topic) =>
+    new Date(topic.nextReviewDate) <= new Date()
+  );
   res.json({
     success: true,
     topics: dueTopics,
-    count: dueTopics.length
+    count: dueTopics.length,
   });
 });
 
-app.get('/api/topics/upcoming', (req, res) => {
-  console.log('🔮 Getting upcoming topics');
-  const upcomingTopics = mockTopics.filter(topic => new Date(topic.nextReviewDate) > new Date());
+app.get("/api/topics/upcoming", (req, res) => {
+  console.log("🔮 Getting upcoming topics");
+  const upcomingTopics = mockTopics.filter((topic) =>
+    new Date(topic.nextReviewDate) > new Date()
+  );
   res.json({
     success: true,
     topics: upcomingTopics,
-    count: upcomingTopics.length
+    count: upcomingTopics.length,
   });
 });
 
-app.post('/api/topics', (req, res) => {
-  console.log('➕ Creating new topic:', req.body);
+app.post("/api/topics", (req, res) => {
+  console.log("➕ Creating new topic:", req.body);
   const { title, content, difficulty = 3 } = req.body;
 
   const newTopic = {
@@ -241,13 +249,13 @@ app.post('/api/topics', (req, res) => {
     title,
     content,
     difficulty,
-    userId: 'mock_user_id',
+    userId: "mock_user_id",
     createdAt: new Date().toISOString(),
     nextReviewDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
     interval: 1,
     repetitions: 0,
     easeFactor: 2.5,
-    isActive: true
+    isActive: true,
   };
 
   mockTopics.push(newTopic);
@@ -255,29 +263,35 @@ app.post('/api/topics', (req, res) => {
   setTimeout(() => {
     res.json({
       success: true,
-      message: 'Topic created successfully',
-      topic: newTopic
+      message: "Topic created successfully",
+      topic: newTopic,
     });
   }, 200); // Fast response
 });
 
-app.post('/api/topics/:id/review', (req, res) => {
-  console.log('✅ Reviewing topic:', req.params.id, 'Quality:', req.body.quality);
+app.post("/api/topics/:id/review", (req, res) => {
+  console.log(
+    "✅ Reviewing topic:",
+    req.params.id,
+    "Quality:",
+    req.body.quality,
+  );
   const { quality } = req.body;
   const topicId = req.params.id;
 
-  const topic = mockTopics.find(t => t._id === topicId);
+  const topic = mockTopics.find((t) => t._id === topicId);
   if (!topic) {
     return res.status(404).json({
       success: false,
-      message: 'Topic not found'
+      message: "Topic not found",
     });
   }
 
   // Simple spaced repetition logic
   if (quality === 0) {
     // Skip - postpone by 1 day
-    topic.nextReviewDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    topic.nextReviewDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      .toISOString();
   } else {
     // Mark done - calculate next interval
     topic.repetitions += 1;
@@ -288,30 +302,32 @@ app.post('/api/topics/:id/review', (req, res) => {
     } else {
       topic.interval = Math.round(topic.interval * topic.easeFactor);
     }
-    topic.nextReviewDate = new Date(Date.now() + topic.interval * 24 * 60 * 60 * 1000).toISOString();
+    topic.nextReviewDate = new Date(
+      Date.now() + topic.interval * 24 * 60 * 60 * 1000,
+    ).toISOString();
   }
 
   res.json({
     success: true,
-    message: 'Review recorded successfully',
+    message: "Review recorded successfully",
     topic: {
       id: topic._id,
       nextReviewDate: topic.nextReviewDate,
       interval: topic.interval,
-      repetitions: topic.repetitions
-    }
+      repetitions: topic.repetitions,
+    },
   });
 });
 
-app.delete('/api/topics/:id', (req, res) => {
-  console.log('🗑️ Deleting topic:', req.params.id);
+app.delete("/api/topics/:id", (req, res) => {
+  console.log("🗑️ Deleting topic:", req.params.id);
   const topicId = req.params.id;
 
-  const index = mockTopics.findIndex(t => t._id === topicId);
+  const index = mockTopics.findIndex((t) => t._id === topicId);
   if (index === -1) {
     return res.status(404).json({
       success: false,
-      message: 'Topic not found'
+      message: "Topic not found",
     });
   }
 
@@ -319,19 +335,19 @@ app.delete('/api/topics/:id', (req, res) => {
 
   res.json({
     success: true,
-    message: 'Topic deleted successfully'
+    message: "Topic deleted successfully",
   });
 });
 
 // Mock study session endpoint
-app.post('/api/user/study-session', (req, res) => {
-  console.log('🔥 Recording study session');
+app.post("/api/user/study-session", (req, res) => {
+  console.log("🔥 Recording study session");
   res.json({
     success: true,
-    message: 'Study session recorded',
+    message: "Study session recorded",
     currentStreak: 1,
     longestStreak: 1,
-    totalStudyDays: 1
+    totalStudyDays: 1,
   });
 });
 
@@ -350,20 +366,22 @@ app.post('/api/user/study-session', (req, res) => {
 //   console.warn('⚠️  Some routes may not be available');
 // }
 
-console.log('✅ Using mock API endpoints for development');
+console.log("✅ Using mock API endpoints for development");
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+  res.status(500).json({
+    message: "Something went wrong!",
+    error: process.env.NODE_ENV === "development"
+      ? err.message
+      : "Internal server error",
   });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+app.use("*", (req, res) => {
+  res.status(404).json({ message: "Route not found" });
 });
 
 const PORT = 3001;

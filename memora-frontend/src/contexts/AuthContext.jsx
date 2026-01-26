@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import apiService from '../services/api';
+import React, { createContext, useContext, useEffect, useReducer } from "react";
+import apiService from "../services/api";
 
 // Initial state
 const initialState = {
@@ -11,13 +11,13 @@ const initialState = {
 
 // Action types
 const AUTH_ACTIONS = {
-  LOGIN_START: 'LOGIN_START',
-  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-  LOGIN_FAILURE: 'LOGIN_FAILURE',
-  LOGOUT: 'LOGOUT',
-  SET_USER: 'SET_USER',
-  SET_LOADING: 'SET_LOADING',
-  CLEAR_ERROR: 'CLEAR_ERROR',
+  LOGIN_START: "LOGIN_START",
+  LOGIN_SUCCESS: "LOGIN_SUCCESS",
+  LOGIN_FAILURE: "LOGIN_FAILURE",
+  LOGOUT: "LOGOUT",
+  SET_USER: "SET_USER",
+  SET_LOADING: "SET_LOADING",
+  CLEAR_ERROR: "CLEAR_ERROR",
 };
 
 // Reducer
@@ -93,10 +93,13 @@ export const AuthProvider = ({ children }) => {
   // Check if user is authenticated on app start
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      
+      const token = localStorage.getItem("accessToken");
+
       if (!token) {
-        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: { isLoading: false } });
+        dispatch({
+          type: AUTH_ACTIONS.SET_LOADING,
+          payload: { isLoading: false },
+        });
         return;
       }
 
@@ -112,13 +115,13 @@ export const AuthProvider = ({ children }) => {
 
           dispatch({
             type: AUTH_ACTIONS.SET_USER,
-            payload: { user }
+            payload: { user },
           });
         } else {
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } catch (error) {
-        console.error('Token verification failed:', error);
+        console.error("Token verification failed:", error);
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
     };
@@ -137,32 +140,32 @@ export const AuthProvider = ({ children }) => {
         let user = response.user;
 
         // Special case for veeracharan99@gmail.com - set MemScore to 9
-        if (user.email === 'veeracharan99@gmail.com') {
+        if (user.email === "veeracharan99@gmail.com") {
           user = {
             ...user,
             memScore: 9,
-            hasCompletedEvaluation: true
+            hasCompletedEvaluation: true,
           };
         }
 
         // Set the authentication token in API service
         if (response.tokens?.accessToken) {
           apiService.setToken(response.tokens.accessToken);
-          localStorage.setItem('accessToken', response.tokens.accessToken);
+          localStorage.setItem("accessToken", response.tokens.accessToken);
         }
 
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: { user }
+          payload: { user },
         });
         return { success: true, user };
       } else {
-        throw new Error(response.message || 'Login failed');
+        throw new Error(response.message || "Login failed");
       }
     } catch (error) {
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: { error: error.message }
+        payload: { error: error.message },
       });
       return { success: false, error: error.message };
     }
@@ -174,20 +177,20 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await apiService.register(userData);
-      
+
       if (response.success) {
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: { user: response.user }
+          payload: { user: response.user },
         });
         return { success: true, user: response.user };
       } else {
-        throw new Error(response.message || 'Registration failed');
+        throw new Error(response.message || "Registration failed");
       }
     } catch (error) {
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: { error: error.message }
+        payload: { error: error.message },
       });
       return { success: false, error: error.message };
     }
@@ -198,7 +201,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
@@ -208,7 +211,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (userData) => {
     dispatch({
       type: AUTH_ACTIONS.SET_USER,
-      payload: { user: { ...state.user, ...userData } }
+      payload: { user: { ...state.user, ...userData } },
     });
   };
 
@@ -222,23 +225,28 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiService.saveEvaluationResults(results);
       if (response.success) {
-        console.log('Evaluation saved successfully. MemScore from backend:', response.memScore);
+        console.log(
+          "Evaluation saved successfully. MemScore from backend:",
+          response.memScore,
+        );
         // Update user with evaluation completion and the memScore from backend response
         updateUser({
           hasCompletedEvaluation: true,
           evaluationResults: results,
-          memScore: response.memScore // Use the memScore returned from backend
+          memScore: response.memScore, // Use the memScore returned from backend
         });
 
         // Also store in localStorage for persistence
-        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const currentUser = JSON.parse(
+          localStorage.getItem("currentUser") || "{}",
+        );
         const updatedUser = {
           ...currentUser,
           hasCompletedEvaluation: true,
           evaluationResults: results,
-          memScore: response.memScore
+          memScore: response.memScore,
         };
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
         // Refresh user data from backend to ensure consistency
         try {
@@ -246,16 +254,16 @@ export const AuthProvider = ({ children }) => {
           if (userResponse.success) {
             dispatch({
               type: AUTH_ACTIONS.SET_USER,
-              payload: { user: userResponse.user }
+              payload: { user: userResponse.user },
             });
           }
         } catch (refreshError) {
-          console.error('Failed to refresh user data:', refreshError);
+          console.error("Failed to refresh user data:", refreshError);
         }
       }
       return response;
     } catch (error) {
-      console.error('Failed to save evaluation results:', error);
+      console.error("Failed to save evaluation results:", error);
       throw error;
     }
   };
@@ -281,7 +289,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

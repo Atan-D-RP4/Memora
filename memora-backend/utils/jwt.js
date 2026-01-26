@@ -1,9 +1,11 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || 'memora-super-secret-jwt-key-2025-development';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'memora-super-secret-refresh-key-2025-development';
-const JWT_EXPIRE = process.env.JWT_EXPIRE || '24h';
-const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || '7d';
+const JWT_SECRET = process.env.JWT_SECRET ||
+  "memora-super-secret-jwt-key-2025-development";
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ||
+  "memora-super-secret-refresh-key-2025-development";
+const JWT_EXPIRE = process.env.JWT_EXPIRE || "24h";
+const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || "7d";
 
 /**
  * Generate JWT access token
@@ -11,10 +13,10 @@ const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || '7d';
  * @returns {String} JWT token
  */
 const generateAccessToken = (payload) => {
-  return jwt.sign(payload, JWT_SECRET, { 
+  return jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRE,
-    issuer: 'memora-api',
-    audience: 'memora-client'
+    issuer: "memora-api",
+    audience: "memora-client",
   });
 };
 
@@ -24,10 +26,10 @@ const generateAccessToken = (payload) => {
  * @returns {String} JWT refresh token
  */
 const generateRefreshToken = (payload) => {
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { 
+  return jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRE,
-    issuer: 'memora-api',
-    audience: 'memora-client'
+    issuer: "memora-api",
+    audience: "memora-client",
   });
 };
 
@@ -39,11 +41,11 @@ const generateRefreshToken = (payload) => {
 const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET, {
-      issuer: 'memora-api',
-      audience: 'memora-client'
+      issuer: "memora-api",
+      audience: "memora-client",
     });
   } catch (error) {
-    throw new Error('Invalid or expired access token');
+    throw new Error("Invalid or expired access token");
   }
 };
 
@@ -55,11 +57,11 @@ const verifyAccessToken = (token) => {
 const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, JWT_REFRESH_SECRET, {
-      issuer: 'memora-api',
-      audience: 'memora-client'
+      issuer: "memora-api",
+      audience: "memora-client",
     });
   } catch (error) {
-    throw new Error('Invalid or expired refresh token');
+    throw new Error("Invalid or expired refresh token");
   }
 };
 
@@ -72,12 +74,12 @@ const generateTokenPair = (user) => {
   const payload = {
     id: user._id || user.id,
     email: user.email,
-    username: user.username
+    username: user.username,
   };
 
   return {
     accessToken: generateAccessToken(payload),
-    refreshToken: generateRefreshToken(payload)
+    refreshToken: generateRefreshToken(payload),
   };
 };
 
@@ -86,5 +88,5 @@ module.exports = {
   generateRefreshToken,
   verifyAccessToken,
   verifyRefreshToken,
-  generateTokenPair
+  generateTokenPair,
 };

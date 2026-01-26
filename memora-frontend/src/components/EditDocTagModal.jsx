@@ -1,29 +1,34 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, LinkIcon } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { LinkIcon, Plus, Trash2, X } from "lucide-react";
 
 const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'Other',
+    name: "",
+    description: "",
+    category: "Other",
     tags: [],
-    color: 'blue',
-    icon: 'folder',
-    externalLinks: []
+    color: "blue",
+    icon: "folder",
+    externalLinks: [],
   });
-  const [newTag, setNewTag] = useState('');
-  const [newLink, setNewLink] = useState({ title: '', url: '', type: 'other', description: '' });
+  const [newTag, setNewTag] = useState("");
+  const [newLink, setNewLink] = useState({
+    title: "",
+    url: "",
+    type: "other",
+    description: "",
+  });
 
   useEffect(() => {
     if (item) {
       setFormData({
-        name: item.name || '',
-        description: item.description || '',
-        category: item.category || 'Other',
+        name: item.name || "",
+        description: item.description || "",
+        category: item.category || "Other",
         tags: item.tags || [],
-        color: item.color || 'blue',
-        icon: item.icon || 'folder',
-        externalLinks: item.externalLinks || []
+        color: item.color || "blue",
+        icon: item.icon || "folder",
+        externalLinks: item.externalLinks || [],
       });
     }
   }, [item]);
@@ -33,52 +38,55 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
     try {
       const submitData = {
         ...formData,
-        tags: formData.tags.filter(tag => tag.trim() !== '')
+        tags: formData.tags.filter((tag) => tag.trim() !== ""),
       };
       await onSubmit(submitData);
       handleClose();
     } catch (error) {
-      console.error('Failed to update item:', error);
+      console.error("Failed to update item:", error);
     }
   };
 
   const handleClose = () => {
-    setNewTag('');
-    setNewLink({ title: '', url: '', type: 'other', description: '' });
+    setNewTag("");
+    setNewLink({ title: "", url: "", type: "other", description: "" });
     onClose();
   };
 
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, newTag.trim()]
+        tags: [...prev.tags, newTag.trim()],
       }));
-      setNewTag('');
+      setNewTag("");
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const addExternalLink = () => {
     if (newLink.title.trim() && newLink.url.trim()) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        externalLinks: [...prev.externalLinks, { ...newLink, addedAt: new Date() }]
+        externalLinks: [...prev.externalLinks, {
+          ...newLink,
+          addedAt: new Date(),
+        }],
       }));
-      setNewLink({ title: '', url: '', type: 'other', description: '' });
+      setNewLink({ title: "", url: "", type: "other", description: "" });
     }
   };
 
   const removeExternalLink = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      externalLinks: prev.externalLinks.filter((_, i) => i !== index)
+      externalLinks: prev.externalLinks.filter((_, i) => i !== index),
     }));
   };
 
@@ -90,7 +98,7 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">
-            Edit {item.type === 'folder' ? 'Folder' : 'Document'}
+            Edit {item.type === "folder" ? "Folder" : "Document"}
           </h2>
           <button
             onClick={handleClose}
@@ -111,7 +119,8 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                 placeholder={`Enter ${item.type} name`}
               />
@@ -123,7 +132,11 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                  }))}
                 className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="Science">Science</option>
@@ -147,7 +160,11 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))}
               rows={3}
               className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               placeholder="Optional description..."
@@ -155,7 +172,7 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
           </div>
 
           {/* Folder-specific options */}
-          {item.type === 'folder' && (
+          {item.type === "folder" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -163,7 +180,8 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                 </label>
                 <select
                   value={formData.color}
-                  onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, color: e.target.value }))}
                   className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                 >
                   <option value="blue">Blue</option>
@@ -183,7 +201,8 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                 </label>
                 <select
                   value={formData.icon}
-                  onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, icon: e.target.value }))}
                   className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                 >
                   <option value="folder">Folder</option>
@@ -202,12 +221,12 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
           )}
 
           {/* External Links for Documents */}
-          {item.type === 'document' && (
+          {item.type === "document" && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
                 External Links
               </label>
-              
+
               {/* Add new link */}
               <div className="bg-white/5 border border-white/20 rounded-lg p-4 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
@@ -215,12 +234,17 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                     type="text"
                     placeholder="Link title"
                     value={newLink.title}
-                    onChange={(e) => setNewLink(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) =>
+                      setNewLink((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))}
                     className="bg-white/5 border border-white/20 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                   />
                   <select
                     value={newLink.type}
-                    onChange={(e) => setNewLink(prev => ({ ...prev, type: e.target.value }))}
+                    onChange={(e) =>
+                      setNewLink((prev) => ({ ...prev, type: e.target.value }))}
                     className="bg-white/5 border border-white/20 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                   >
                     <option value="youtube">YouTube</option>
@@ -235,7 +259,8 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                   type="url"
                   placeholder="https://..."
                   value={newLink.url}
-                  onChange={(e) => setNewLink(prev => ({ ...prev, url: e.target.value }))}
+                  onChange={(e) =>
+                    setNewLink((prev) => ({ ...prev, url: e.target.value }))}
                   className="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 mb-3"
                 />
                 <div className="flex justify-end">
@@ -254,12 +279,17 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
               {formData.externalLinks.length > 0 && (
                 <div className="space-y-2">
                   {formData.externalLinks.map((link, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white/5 border border-white/20 rounded-lg p-3">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-white/5 border border-white/20 rounded-lg p-3"
+                    >
                       <div className="flex items-center space-x-3">
                         <LinkIcon className="w-4 h-4 text-blue-400" />
                         <div>
                           <div className="text-white text-sm">{link.title}</div>
-                          <div className="text-gray-400 text-xs">{link.type}</div>
+                          <div className="text-gray-400 text-xs">
+                            {link.type}
+                          </div>
                         </div>
                       </div>
                       <button
@@ -286,7 +316,8 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
                 type="text"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), addTag())}
                 className="flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                 placeholder="Add a tag..."
               />
@@ -333,7 +364,7 @@ const EditDocTagModal = ({ isOpen, onClose, onSubmit, item, loading }) => {
               disabled={loading || !formData.name.trim()}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
             >
-              {loading ? 'Updating...' : 'Update'}
+              {loading ? "Updating..." : "Update"}
             </button>
           </div>
         </form>

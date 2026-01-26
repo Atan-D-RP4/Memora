@@ -1,41 +1,41 @@
 class DocTagsService {
   constructor() {
-    this.baseURL = '/api/doctags';
+    this.baseURL = "/api/doctags";
   }
 
   // Get authorization headers
   getAuthHeaders() {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
     return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
     };
   }
 
   // Upload files
   async uploadFiles(files) {
     const formData = new FormData();
-    Array.from(files).forEach(file => {
-      formData.append('files', file);
+    Array.from(files).forEach((file) => {
+      formData.append("files", file);
     });
 
     try {
       const response = await fetch(`${this.baseURL}/upload`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload files');
+        throw new Error("Failed to upload files");
       }
 
       const data = await response.json();
       return data.files;
     } catch (error) {
-      console.error('File upload error:', error);
+      console.error("File upload error:", error);
       throw error;
     }
   }
@@ -44,18 +44,18 @@ class DocTagsService {
   async createDocTag(docTagData) {
     try {
       const response = await fetch(this.baseURL, {
-        method: 'POST',
+        method: "POST",
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(docTagData)
+        body: JSON.stringify(docTagData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create DocTag');
+        throw new Error("Failed to create DocTag");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Create DocTag error:', error);
+      console.error("Create DocTag error:", error);
       throw error;
     }
   }
@@ -64,27 +64,27 @@ class DocTagsService {
   async getDocTags(options = {}) {
     try {
       const params = new URLSearchParams();
-      
+
       if (options.parentId !== undefined) {
-        params.append('parentId', options.parentId);
+        params.append("parentId", options.parentId);
       }
-      if (options.type) params.append('type', options.type);
-      if (options.category) params.append('category', options.category);
-      if (options.search) params.append('search', options.search);
-      if (options.limit) params.append('limit', options.limit);
-      if (options.page) params.append('page', options.page);
+      if (options.type) params.append("type", options.type);
+      if (options.category) params.append("category", options.category);
+      if (options.search) params.append("search", options.search);
+      if (options.limit) params.append("limit", options.limit);
+      if (options.page) params.append("page", options.page);
 
       const response = await fetch(`${this.baseURL}?${params}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch DocTags');
+        throw new Error("Failed to fetch DocTags");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Get DocTags error:', error);
+      console.error("Get DocTags error:", error);
       throw error;
     }
   }
@@ -93,18 +93,18 @@ class DocTagsService {
   async updateDocTag(id, updateData) {
     try {
       const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update DocTag');
+        throw new Error("Failed to update DocTag");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Update DocTag error:', error);
+      console.error("Update DocTag error:", error);
       throw error;
     }
   }
@@ -113,17 +113,17 @@ class DocTagsService {
   async deleteDocTag(id) {
     try {
       const response = await fetch(`${this.baseURL}/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete DocTag');
+        throw new Error("Failed to delete DocTag");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Delete DocTag error:', error);
+      console.error("Delete DocTag error:", error);
       throw error;
     }
   }
@@ -132,16 +132,16 @@ class DocTagsService {
   async getRecentDocuments(limit = 10) {
     try {
       const response = await fetch(`${this.baseURL}/recent?limit=${limit}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch recent documents');
+        throw new Error("Failed to fetch recent documents");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Get recent documents error:', error);
+      console.error("Get recent documents error:", error);
       throw error;
     }
   }
@@ -150,23 +150,23 @@ class DocTagsService {
   async searchDocTags(query, options = {}) {
     try {
       const params = new URLSearchParams();
-      params.append('search', query);
-      
-      if (options.type) params.append('type', options.type);
-      if (options.category) params.append('category', options.category);
-      if (options.limit) params.append('limit', options.limit);
+      params.append("search", query);
+
+      if (options.type) params.append("type", options.type);
+      if (options.category) params.append("category", options.category);
+      if (options.limit) params.append("limit", options.limit);
 
       const response = await fetch(`${this.baseURL}?${params}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to search DocTags');
+        throw new Error("Failed to search DocTags");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Search DocTags error:', error);
+      console.error("Search DocTags error:", error);
       throw error;
     }
   }
@@ -175,12 +175,12 @@ class DocTagsService {
   async createDocumentFromTopic(topicData) {
     const docTagData = {
       name: topicData.title,
-      description: topicData.content ? topicData.content.substring(0, 500) : '',
-      type: 'document',
-      category: topicData.category || 'Other',
+      description: topicData.content ? topicData.content.substring(0, 500) : "",
+      type: "document",
+      category: topicData.category || "Other",
       tags: topicData.tags || [],
       attachments: topicData.attachments || [],
-      externalLinks: topicData.externalLinks || []
+      externalLinks: topicData.externalLinks || [],
     };
 
     return await this.createDocTag(docTagData);

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Flame, Award, X } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Award, CheckCircle, Flame, X } from "lucide-react";
 
-const Toast = ({ message, type = 'success', isVisible, onClose, duration = 4000 }) => {
+const Toast = (
+  { message, type = "success", isVisible, onClose, duration = 4000 },
+) => {
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {
@@ -14,13 +16,13 @@ const Toast = ({ message, type = 'success', isVisible, onClose, duration = 4000 
 
   const getIcon = () => {
     switch (type) {
-      case 'streak':
+      case "streak":
         return <Flame className="w-5 h-5 text-orange-400" />;
-      case 'achievement':
+      case "achievement":
         return <Award className="w-5 h-5 text-yellow-400" />;
-      case 'error':
+      case "error":
         return <X className="w-5 h-5 text-red-400" />;
-      case 'success':
+      case "success":
       default:
         return <CheckCircle className="w-5 h-5 text-green-400" />;
     }
@@ -28,15 +30,15 @@ const Toast = ({ message, type = 'success', isVisible, onClose, duration = 4000 
 
   const getColors = () => {
     switch (type) {
-      case 'streak':
-        return 'bg-orange-500/10 border-orange-500/20 text-orange-100';
-      case 'achievement':
-        return 'bg-yellow-500/10 border-yellow-500/20 text-yellow-100';
-      case 'error':
-        return 'bg-red-500/10 border-red-500/20 text-red-100';
-      case 'success':
+      case "streak":
+        return "bg-orange-500/10 border-orange-500/20 text-orange-100";
+      case "achievement":
+        return "bg-yellow-500/10 border-yellow-500/20 text-yellow-100";
+      case "error":
+        return "bg-red-500/10 border-red-500/20 text-red-100";
+      case "success":
       default:
-        return 'bg-green-500/10 border-green-500/20 text-green-100';
+        return "bg-green-500/10 border-green-500/20 text-green-100";
     }
   };
 

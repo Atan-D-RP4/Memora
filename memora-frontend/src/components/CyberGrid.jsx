@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
-const CyberGrid = ({ className = '' }) => {
+const CyberGrid = ({ className = "" }) => {
   const gridRef = useRef(null);
 
   useEffect(() => {
@@ -12,22 +12,22 @@ const CyberGrid = ({ className = '' }) => {
       const rect = grid.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
       const y = ((e.clientY - rect.top) / rect.height) * 100;
-      
-      grid.style.setProperty('--mouse-x', `${x}%`);
-      grid.style.setProperty('--mouse-y', `${y}%`);
+
+      grid.style.setProperty("--mouse-x", `${x}%`);
+      grid.style.setProperty("--mouse-y", `${y}%`);
     };
 
-    grid.addEventListener('mousemove', handleMouseMove);
-    return () => grid.removeEventListener('mousemove', handleMouseMove);
+    grid.addEventListener("mousemove", handleMouseMove);
+    return () => grid.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   return (
-    <div 
+    <div
       ref={gridRef}
       className={`absolute inset-0 cyber-grid ${className}`}
       style={{
-        '--mouse-x': '50%',
-        '--mouse-y': '50%',
+        "--mouse-x": "50%",
+        "--mouse-y": "50%",
       }}
     >
       {/* Animated grid nodes */}
@@ -54,10 +54,11 @@ const CyberGrid = ({ className = '' }) => {
       </div>
 
       {/* Radial gradient overlay for mouse interaction */}
-      <div 
+      <div
         className="absolute inset-0 opacity-20"
         style={{
-          background: `radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(0, 212, 255, 0.3) 0%, transparent 50%)`,
+          background:
+            `radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(0, 212, 255, 0.3) 0%, transparent 50%)`,
         }}
       />
     </div>

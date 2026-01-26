@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import apiService from '../services/api';
+import { useCallback, useEffect, useState } from "react";
+import apiService from "../services/api";
 
 export const useTopics = () => {
   const [topics, setTopics] = useState([]);
@@ -19,7 +19,7 @@ export const useTopics = () => {
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch due topics:', err);
+      console.error("Failed to fetch due topics:", err);
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ export const useTopics = () => {
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch upcoming topics:', err);
+      console.error("Failed to fetch upcoming topics:", err);
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export const useTopics = () => {
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch topics:', err);
+      console.error("Failed to fetch topics:", err);
     } finally {
       setLoading(false);
     }
@@ -64,27 +64,30 @@ export const useTopics = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('useTopics: Creating topic with data:', topicData);
-      console.log('useTopics: Current token in localStorage:', localStorage.getItem('accessToken'));
+      console.log("useTopics: Creating topic with data:", topicData);
+      console.log(
+        "useTopics: Current token in localStorage:",
+        localStorage.getItem("accessToken"),
+      );
       const response = await apiService.createTopic(topicData);
-      console.log('useTopics: API response:', response);
+      console.log("useTopics: API response:", response);
       if (response.success) {
         // Refresh the topics lists
         await Promise.all([
           fetchDueTopics(),
           fetchUpcomingTopics(),
-          fetchTopics()
+          fetchTopics(),
         ]);
         return response;
       } else {
-        throw new Error(response.message || 'Failed to create topic');
+        throw new Error(response.message || "Failed to create topic");
       }
     } catch (err) {
-      console.error('useTopics: Failed to create topic:', err);
-      console.error('useTopics: Error details:', {
+      console.error("useTopics: Failed to create topic:", err);
+      console.error("useTopics: Error details:", {
         message: err.message,
         stack: err.stack,
-        name: err.name
+        name: err.name,
       });
       setError(err.message);
       throw err;
@@ -102,24 +105,24 @@ export const useTopics = () => {
       if (response.success) {
         // Update the topic in all relevant lists
         const updatedTopic = response.topic;
-        
-        setTopics(prev => prev.map(topic => 
-          topic._id === id ? updatedTopic : topic
-        ));
-        
-        setDueTopics(prev => prev.map(topic => 
-          topic._id === id ? updatedTopic : topic
-        ));
-        
-        setUpcomingTopics(prev => prev.map(topic => 
-          topic._id === id ? updatedTopic : topic
-        ));
-        
+
+        setTopics((prev) =>
+          prev.map((topic) => topic._id === id ? updatedTopic : topic)
+        );
+
+        setDueTopics((prev) =>
+          prev.map((topic) => topic._id === id ? updatedTopic : topic)
+        );
+
+        setUpcomingTopics((prev) =>
+          prev.map((topic) => topic._id === id ? updatedTopic : topic)
+        );
+
         return response;
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to update topic:', err);
+      console.error("Failed to update topic:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -134,14 +137,14 @@ export const useTopics = () => {
       const response = await apiService.deleteTopic(id);
       if (response.success) {
         // Remove the topic from all lists
-        setTopics(prev => prev.filter(topic => topic._id !== id));
-        setDueTopics(prev => prev.filter(topic => topic._id !== id));
-        setUpcomingTopics(prev => prev.filter(topic => topic._id !== id));
+        setTopics((prev) => prev.filter((topic) => topic._id !== id));
+        setDueTopics((prev) => prev.filter((topic) => topic._id !== id));
+        setUpcomingTopics((prev) => prev.filter((topic) => topic._id !== id));
         return response;
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to delete topic:', err);
+      console.error("Failed to delete topic:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -153,16 +156,19 @@ export const useTopics = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.reviewTopic(id, { quality, responseTime });
+      const response = await apiService.reviewTopic(id, {
+        quality,
+        responseTime,
+      });
       if (response.success) {
         // Remove from due topics and refresh lists
-        setDueTopics(prev => prev.filter(topic => topic._id !== id));
+        setDueTopics((prev) => prev.filter((topic) => topic._id !== id));
         await fetchUpcomingTopics(); // Refresh upcoming as the topic might appear there
         return response;
       }
     } catch (err) {
       setError(err.message);
-      console.error('Failed to review topic:', err);
+      console.error("Failed to review topic:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -186,7 +192,7 @@ export const useTopics = () => {
     upcomingTopics,
     loading,
     error,
-    
+
     // Actions
     fetchTopics,
     fetchDueTopics,
@@ -196,10 +202,10 @@ export const useTopics = () => {
     deleteTopic,
     reviewTopic,
     clearError,
-    
+
     // Computed values
     dueCount: dueTopics.length,
     upcomingCount: upcomingTopics.length,
-    totalTopics: topics.length
+    totalTopics: topics.length,
   };
 };

@@ -1,43 +1,43 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
 
 // Basic middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
+  origin: "http://localhost:5173",
+  credentials: true,
 }));
 
 app.use(express.json());
 
 // Test route
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Memora Backend API is running',
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Memora Backend API is running",
     timestamp: new Date().toISOString(),
-    port: 8080
+    port: 8080,
   });
 });
 
 // Test auth routes
-app.post('/api/auth/register', (req, res) => {
-  console.log('Register request:', req.body);
-  res.json({ 
-    success: true, 
-    message: 'User registered successfully',
-    user: { id: 1, email: req.body.email, username: req.body.username }
+app.post("/api/auth/register", (req, res) => {
+  console.log("Register request:", req.body);
+  res.json({
+    success: true,
+    message: "User registered successfully",
+    user: { id: 1, email: req.body.email, username: req.body.username },
   });
 });
 
-app.post('/api/auth/login', (req, res) => {
-  console.log('Login request:', req.body);
-  res.json({ 
-    success: true, 
-    message: 'Login successful',
+app.post("/api/auth/login", (req, res) => {
+  console.log("Login request:", req.body);
+  res.json({
+    success: true,
+    message: "Login successful",
     user: { id: 1, email: req.body.email },
-    token: 'fake-jwt-token'
+    token: "fake-jwt-token",
   });
 });
 

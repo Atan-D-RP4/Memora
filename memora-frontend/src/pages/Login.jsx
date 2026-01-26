@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Logo from '../components/Logo';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import Logo from "../components/Logo";
+import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const { login, isLoading: authLoading, error: authError, clearError } =
+    useAuth();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +27,16 @@ function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear errors when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -39,14 +46,14 @@ function Login() {
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     }
 
     return newErrors;
@@ -68,7 +75,7 @@ function Login() {
     try {
       const result = await login({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
       if (result.success) {
@@ -77,20 +84,20 @@ function Login() {
         // Navigate based on evaluation status
         setTimeout(() => {
           if (result.user.hasCompletedEvaluation) {
-            navigate('/dashboard');
+            navigate("/dashboard");
           } else {
-            navigate('/evaluation');
+            navigate("/evaluation");
           }
         }, 1000);
       } else {
         setErrors({
-          submit: result.error || 'Invalid email or password. Please try again.'
+          submit: result.error ||
+            "Invalid email or password. Please try again.",
         });
       }
-
     } catch (error) {
       setErrors({
-        submit: error.message || 'Login failed. Please try again.'
+        submit: error.message || "Login failed. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -101,27 +108,34 @@ function Login() {
     <div className="bg-black text-white min-h-screen">
       {/* Grid Background */}
       <div className="absolute inset-0 opacity-20">
-        <div className="h-full w-full" style={{
-          backgroundImage: `
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundImage: `
             linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
           `,
-          backgroundSize: '100px 100px'
-        }}>
+            backgroundSize: "100px 100px",
+          }}
+        >
         </div>
       </div>
 
       {/* Plus signs at grid intersections */}
       <div className="absolute top-32 left-32">
         <div className="w-3 h-3 relative">
-          <div className="absolute top-1/2 left-0 w-full h-px bg-white/30"></div>
-          <div className="absolute left-1/2 top-0 w-px h-full bg-white/30"></div>
+          <div className="absolute top-1/2 left-0 w-full h-px bg-white/30">
+          </div>
+          <div className="absolute left-1/2 top-0 w-px h-full bg-white/30">
+          </div>
         </div>
       </div>
       <div className="absolute top-64 right-64">
         <div className="w-3 h-3 relative">
-          <div className="absolute top-1/2 left-0 w-full h-px bg-white/30"></div>
-          <div className="absolute left-1/2 top-0 w-px h-full bg-white/30"></div>
+          <div className="absolute top-1/2 left-0 w-full h-px bg-white/30">
+          </div>
+          <div className="absolute left-1/2 top-0 w-px h-full bg-white/30">
+          </div>
         </div>
       </div>
 
@@ -139,12 +153,17 @@ function Login() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           >
-            <Link to="/" className="inline-flex items-center space-x-2 mb-6 hover:scale-105 transition-transform">
+            <Link
+              to="/"
+              className="inline-flex items-center space-x-2 mb-6 hover:scale-105 transition-transform"
+            >
               <Logo size="md" className="text-white" />
               <span className="text-xl font-semibold">Memora</span>
             </Link>
             <h2 className="text-3xl font-bold mb-2">Welcome back</h2>
-            <p className="text-gray-400">Sign in to your account to continue learning</p>
+            <p className="text-gray-400">
+              Sign in to your account to continue learning
+            </p>
           </motion.div>
 
           {/* Login Form */}
@@ -156,25 +175,36 @@ function Login() {
           >
             {/* Corner plus signs */}
             <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+              </div>
+              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+              </div>
             </div>
             <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+              </div>
+              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+              </div>
             </div>
             <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+              </div>
+              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+              </div>
             </div>
             <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+              </div>
+              <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Email address
                 </label>
                 <input
@@ -186,8 +216,8 @@ function Login() {
                   onChange={handleChange}
                   className={`w-full px-3 py-2 bg-black border rounded-md text-white placeholder-gray-500 focus:outline-none transition-colors ${
                     errors.email
-                      ? 'border-red-400/50 focus:border-red-400'
-                      : 'border-white/20 focus:border-white/40'
+                      ? "border-red-400/50 focus:border-red-400"
+                      : "border-white/20 focus:border-white/40"
                   }`}
                   placeholder="Enter your email"
                 />
@@ -207,14 +237,17 @@ function Login() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     value={formData.password}
                     onChange={handleChange}
@@ -226,7 +259,9 @@ function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword
+                      ? <EyeOff className="w-4 h-4" />
+                      : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -239,13 +274,19 @@ function Login() {
                     type="checkbox"
                     className="h-4 w-4 bg-black border border-white/20 rounded focus:ring-blue-500 focus:ring-offset-0"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-gray-300"
+                  >
                     Remember me
                   </label>
                 </div>
 
                 <div className="text-sm">
-                  <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
+                  <a
+                    href="#"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
                     Forgot your password?
                   </a>
                 </div>
@@ -258,23 +299,28 @@ function Login() {
                 whileTap={{ scale: isLoading || isSuccess ? 1 : 0.98 }}
                 className={`w-full px-4 py-2 rounded-md font-medium transition-all duration-300 disabled:cursor-not-allowed flex items-center justify-center ${
                   isSuccess
-                    ? 'bg-green-500 text-white'
-                    : 'bg-white text-black hover:bg-gray-100 disabled:opacity-50'
+                    ? "bg-green-500 text-white"
+                    : "bg-white text-black hover:bg-gray-100 disabled:opacity-50"
                 }`}
               >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                ) : isSuccess ? (
-                  <>
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Welcome back!
-                  </>
-                ) : (
-                  <>
-                    Sign in
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
+                {isLoading
+                  ? (
+                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin">
+                    </div>
+                  )
+                  : isSuccess
+                  ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Welcome back!
+                    </>
+                  )
+                  : (
+                    <>
+                      Sign in
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
               </motion.button>
 
               {/* Submit Error */}
@@ -295,8 +341,11 @@ function Login() {
 
             <div className="mt-6 text-center">
               <p className="text-gray-400">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-blue-400 hover:text-blue-300 transition-colors">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
                   Sign up
                 </Link>
               </p>
@@ -306,10 +355,20 @@ function Login() {
           {/* Footer */}
           <div className="mt-8 text-center text-sm text-gray-500">
             <p>
-              By signing in, you agree to our{' '}
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
-              {' '}and{' '}
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+              By signing in, you agree to our{" "}
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </a>
             </p>
           </div>
         </motion.div>

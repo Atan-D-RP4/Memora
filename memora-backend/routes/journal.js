@@ -1,18 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Journal = require('../models/Journal');
-const { authenticateToken } = require('../middleware/auth');
+const Journal = require("../models/Journal");
+const { authenticateToken } = require("../middleware/auth");
 
 /**
  * @route   GET /api/journal/health
  * @desc    Health check for Journal API
  * @access  Public
  */
-router.get('/health', (req, res) => {
+router.get("/health", (req, res) => {
   res.json({
     success: true,
-    message: 'Journal API is running',
-    timestamp: new Date().toISOString()
+    message: "Journal API is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -21,35 +21,34 @@ router.get('/health', (req, res) => {
  * @desc    Get journal entry for a specific date
  * @access  Private
  */
-router.get('/:date', authenticateToken, async (req, res) => {
+router.get("/:date", authenticateToken, async (req, res) => {
   try {
     const { date } = req.params;
     const userId = req.user.id;
-    
+
     // Validate date format (YYYY-MM-DD)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
-    
+
     const entry = await Journal.findOne({
       userId,
       dateString: date,
-      isActive: true
+      isActive: true,
     });
-    
+
     res.json({
       success: true,
-      entry: entry || null
+      entry: entry || null,
     });
-    
   } catch (error) {
-    console.error('Get journal entry error:', error);
+    console.error("Get journal entry error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get journal entry'
+      message: "Failed to get journal entry",
     });
   }
 });
@@ -59,34 +58,34 @@ router.get('/:date', authenticateToken, async (req, res) => {
  * @desc    Create or update journal entry
  * @access  Private
  */
-router.post('/', authenticateToken, async (req, res) => {
+router.post("/", authenticateToken, async (req, res) => {
   try {
     const { date, content, mood, tags, activities } = req.body;
     const userId = req.user.id;
-    
+
     // Validate required fields
     if (!date || !content) {
       return res.status(400).json({
         success: false,
-        message: 'Date and content are required'
+        message: "Date and content are required",
       });
     }
-    
+
     // Validate date format
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
-    
+
     // Find existing entry or create new one
     let entry = await Journal.findOne({
       userId,
       dateString: date,
-      isActive: true
+      isActive: true,
     });
-    
+
     if (entry) {
       // Update existing entry
       entry.content = content;
@@ -101,25 +100,24 @@ router.post('/', authenticateToken, async (req, res) => {
         date: new Date(date),
         dateString: date,
         content,
-        mood: mood || 'neutral',
+        mood: mood || "neutral",
         tags: tags || [],
-        activities: activities || []
+        activities: activities || [],
       });
     }
-    
+
     await entry.save();
-    
+
     res.json({
       success: true,
-      message: entry.isNew ? 'Journal entry created' : 'Journal entry updated',
-      entry
+      message: entry.isNew ? "Journal entry created" : "Journal entry updated",
+      entry,
     });
-    
   } catch (error) {
-    console.error('Save journal entry error:', error);
+    console.error("Save journal entry error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to save journal entry'
+      message: "Failed to save journal entry",
     });
   }
 });
@@ -129,70 +127,82 @@ router.post('/', authenticateToken, async (req, res) => {
  * @desc    Get journal entries for a date range
  * @access  Private
  */
-router.get('/range/:startDate/:endDate', authenticateToken, async (req, res) => {
-  try {
-    const { startDate, endDate } = req.params;
-    const userId = req.user.id;
-    
-    // Validate date formats
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
-      return res.status(400).json({
+router.get(
+  "/range/:startDate/:endDate",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { startDate, endDate } = req.params;
+      const userId = req.user.id;
+
+      // Validate date formats
+      if (
+        !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid date format. Use YYYY-MM-DD",
+        });
+      }
+
+      const entries = await Journal.getEntriesInRange(
+        userId,
+        startDate,
+        endDate,
+      );
+
+      res.json({
+        success: true,
+        entries,
+        count: entries.length,
+      });
+    } catch (error) {
+      console.error("Get journal range error:", error);
+      res.status(500).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Failed to get journal entries",
       });
     }
-    
-    const entries = await Journal.getEntriesInRange(userId, startDate, endDate);
-    
-    res.json({
-      success: true,
-      entries,
-      count: entries.length
-    });
-    
-  } catch (error) {
-    console.error('Get journal range error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get journal entries'
-    });
-  }
-});
+  },
+);
 
 /**
  * @route   GET /api/journal/weekly/:weekStartDate
  * @desc    Get weekly summary
  * @access  Private
  */
-router.get('/weekly/:weekStartDate', authenticateToken, async (req, res) => {
+router.get("/weekly/:weekStartDate", authenticateToken, async (req, res) => {
   try {
     const { weekStartDate } = req.params;
     const userId = req.user.id;
-    
+
     // Validate date format
     if (!/^\d{4}-\d{2}-\d{2}$/.test(weekStartDate)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
-    
+
     const entries = await Journal.getWeeklySummary(userId, weekStartDate);
-    const summaryText = await Journal.generateWeeklySummaryText(userId, weekStartDate);
-    
+    const summaryText = await Journal.generateWeeklySummaryText(
+      userId,
+      weekStartDate,
+    );
+
     res.json({
       success: true,
       entries,
       summaryText,
       weekStartDate,
-      count: entries.length
+      count: entries.length,
     });
-    
   } catch (error) {
-    console.error('Get weekly summary error:', error);
+    console.error("Get weekly summary error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get weekly summary'
+      message: "Failed to get weekly summary",
     });
   }
 });
@@ -202,39 +212,42 @@ router.get('/weekly/:weekStartDate', authenticateToken, async (req, res) => {
  * @desc    Get monthly summary
  * @access  Private
  */
-router.get('/monthly/:year/:month', authenticateToken, async (req, res) => {
+router.get("/monthly/:year/:month", authenticateToken, async (req, res) => {
   try {
     const { year, month } = req.params;
     const userId = req.user.id;
-    
+
     // Validate year and month
     const yearNum = parseInt(year);
     const monthNum = parseInt(month);
-    
+
     if (isNaN(yearNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid year or month'
+        message: "Invalid year or month",
       });
     }
-    
+
     const entries = await Journal.getMonthlySummary(userId, yearNum, monthNum);
-    const summaryText = await Journal.generateMonthlySummaryText(userId, yearNum, monthNum);
-    
+    const summaryText = await Journal.generateMonthlySummaryText(
+      userId,
+      yearNum,
+      monthNum,
+    );
+
     res.json({
       success: true,
       entries,
       summaryText,
       year: yearNum,
       month: monthNum,
-      count: entries.length
+      count: entries.length,
     });
-    
   } catch (error) {
-    console.error('Get monthly summary error:', error);
+    console.error("Get monthly summary error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get monthly summary'
+      message: "Failed to get monthly summary",
     });
   }
 });
@@ -244,45 +257,44 @@ router.get('/monthly/:year/:month', authenticateToken, async (req, res) => {
  * @desc    Delete journal entry
  * @access  Private
  */
-router.delete('/:date', authenticateToken, async (req, res) => {
+router.delete("/:date", authenticateToken, async (req, res) => {
   try {
     const { date } = req.params;
     const userId = req.user.id;
-    
+
     // Validate date format
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format. Use YYYY-MM-DD'
+        message: "Invalid date format. Use YYYY-MM-DD",
       });
     }
-    
+
     const entry = await Journal.findOne({
       userId,
       dateString: date,
-      isActive: true
+      isActive: true,
     });
-    
+
     if (!entry) {
       return res.status(404).json({
         success: false,
-        message: 'Journal entry not found'
+        message: "Journal entry not found",
       });
     }
-    
+
     entry.isActive = false;
     await entry.save();
-    
+
     res.json({
       success: true,
-      message: 'Journal entry deleted'
+      message: "Journal entry deleted",
     });
-    
   } catch (error) {
-    console.error('Delete journal entry error:', error);
+    console.error("Delete journal entry error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete journal entry'
+      message: "Failed to delete journal entry",
     });
   }
 });

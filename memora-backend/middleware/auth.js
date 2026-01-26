@@ -1,4 +1,4 @@
-const { verifyAccessToken } = require('../utils/jwt');
+const { verifyAccessToken } = require("../utils/jwt");
 
 /**
  * Middleware to authenticate JWT tokens
@@ -7,13 +7,13 @@ const { verifyAccessToken } = require('../utils/jwt');
  * @param {Function} next - Express next function
  */
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ 
+    return res.status(401).json({
       success: false,
-      message: 'Access token required' 
+      message: "Access token required",
     });
   }
 
@@ -22,10 +22,10 @@ const authenticateToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       success: false,
-      message: 'Invalid or expired token',
-      error: error.message
+      message: "Invalid or expired token",
+      error: error.message,
     });
   }
 };
@@ -37,8 +37,8 @@ const authenticateToken = (req, res, next) => {
  * @param {Function} next - Express next function
  */
 const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (token) {
     try {
@@ -63,16 +63,16 @@ const optionalAuth = (req, res, next) => {
 const requireRole = (roles = []) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        message: 'Authentication required' 
+        message: "Authentication required",
       });
     }
 
     if (roles.length > 0 && !roles.includes(req.user.role)) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: 'Insufficient permissions' 
+        message: "Insufficient permissions",
       });
     }
 
@@ -83,5 +83,5 @@ const requireRole = (roles = []) => {
 module.exports = {
   authenticateToken,
   optionalAuth,
-  requireRole
+  requireRole,
 };

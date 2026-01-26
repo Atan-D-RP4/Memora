@@ -1,65 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Target, Tag, AlertCircle, Plus, X, Edit3, Calendar } from 'lucide-react';
-import Modal from './Modal';
+import React, { useEffect, useState } from "react";
+import {
+  AlertCircle,
+  BookOpen,
+  Calendar,
+  Edit3,
+  Plus,
+  Tag,
+  Target,
+  X,
+} from "lucide-react";
+import Modal from "./Modal";
 
-const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) => {
+const EditTopicModal = (
+  { isOpen, onClose, onSubmit, topic, loading = false },
+) => {
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
+    title: "",
+    content: "",
     difficulty: 3,
     tags: [],
-    learnedDate: new Date().toISOString().split('T')[0]
+    learnedDate: new Date().toISOString().split("T")[0],
   });
-  
-  const [tagInput, setTagInput] = useState('');
+
+  const [tagInput, setTagInput] = useState("");
   const [errors, setErrors] = useState({});
 
   // Initialize form data when topic changes
   useEffect(() => {
     if (topic) {
       setFormData({
-        title: topic.title || '',
-        content: topic.content || '',
+        title: topic.title || "",
+        content: topic.content || "",
         difficulty: topic.difficulty || 3,
         tags: topic.tags || [],
-        learnedDate: topic.learnedDate ? new Date(topic.learnedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        learnedDate: topic.learnedDate
+          ? new Date(topic.learnedDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
       });
     }
   }, [topic]);
 
   const difficultyLabels = {
-    1: 'Very Easy',
-    2: 'Easy', 
-    3: 'Medium',
-    4: 'Hard',
-    5: 'Very Hard'
+    1: "Very Easy",
+    2: "Easy",
+    3: "Medium",
+    4: "Hard",
+    5: "Very Hard",
   };
 
   const difficultyColors = {
-    1: 'text-green-400 bg-green-400/10 border-green-400/20',
-    2: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-    3: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-    4: 'text-orange-400 bg-orange-400/10 border-orange-400/20',
-    5: 'text-red-400 bg-red-400/10 border-red-400/20'
+    1: "text-green-400 bg-green-400/10 border-green-400/20",
+    2: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+    3: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+    4: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+    5: "text-red-400 bg-red-400/10 border-red-400/20",
   };
-
-
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
     } else if (formData.title.length > 200) {
-      newErrors.title = 'Title must be less than 200 characters';
+      newErrors.title = "Title must be less than 200 characters";
     }
-    
+
     if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
+      newErrors.content = "Content is required";
     } else if (formData.content.length > 10000) {
-      newErrors.content = 'Content must be less than 10,000 characters';
+      newErrors.content = "Content must be less than 10,000 characters";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -73,8 +84,8 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
       await onSubmit(formData);
       handleClose();
     } catch (error) {
-      console.error('Error updating topic:', error);
-      setErrors({ submit: error.message || 'Failed to update topic' });
+      console.error("Error updating topic:", error);
+      setErrors({ submit: error.message || "Failed to update topic" });
     }
   };
 
@@ -85,23 +96,23 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
 
   const addTag = () => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        tags: [...prev.tags, tagInput.trim()],
       }));
-      setTagInput('');
+      setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleTagInputKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTag();
     }
@@ -121,7 +132,8 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
           <input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, title: e.target.value }))}
             placeholder="e.g., JavaScript Promises & Async/Await"
             className="w-full px-4 py-3 bg-black border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -141,7 +153,8 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
           </label>
           <textarea
             value={formData.content}
-            onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, content: e.target.value }))}
             placeholder="Enter the main content you want to learn and remember..."
             rows={4}
             className="w-full px-4 py-3 bg-black border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -159,8 +172,6 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
           </div>
         </div>
 
-
-
         {/* Difficulty */}
         <div>
           <label className="flex items-center space-x-2 text-sm font-medium text-gray-300 mb-2">
@@ -168,15 +179,16 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
             <span>Difficulty Level</span>
           </label>
           <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map(level => (
+            {[1, 2, 3, 4, 5].map((level) => (
               <button
                 key={level}
                 type="button"
-                onClick={() => setFormData(prev => ({ ...prev, difficulty: level }))}
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, difficulty: level }))}
                 className={`p-3 rounded-lg border text-sm font-medium transition-all ${
                   formData.difficulty === level
                     ? difficultyColors[level]
-                    : 'text-gray-400 bg-white/5 border-white/10 hover:bg-white/10'
+                    : "text-gray-400 bg-white/5 border-white/10 hover:bg-white/10"
                 }`}
               >
                 <div className="text-center">
@@ -197,9 +209,10 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
           <input
             type="date"
             value={formData.learnedDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, learnedDate: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, learnedDate: e.target.value }))}
             className="w-full px-3 py-2 bg-black border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
-            max={new Date().toISOString().split('T')[0]} // Can't select future dates
+            max={new Date().toISOString().split("T")[0]} // Can't select future dates
           />
           <p className="text-xs text-gray-400 mt-1">
             When did you first learn this topic?
@@ -216,7 +229,8 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
             <input
               type="text"
               value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
+              onChange={(e) =>
+                setTagInput(e.target.value)}
               onKeyPress={handleTagInputKeyPress}
               placeholder="Add a tag..."
               className="flex-1 px-3 py-2 bg-black border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -274,17 +288,19 @@ const EditTopicModal = ({ isOpen, onClose, onSubmit, topic, loading = false }) =
             disabled={loading}
             className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Updating...</span>
-              </>
-            ) : (
-              <>
-                <Edit3 className="w-4 h-4" />
-                <span>Update Topic</span>
-              </>
-            )}
+            {loading
+              ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Updating...</span>
+                </>
+              )
+              : (
+                <>
+                  <Edit3 className="w-4 h-4" />
+                  <span>Update Topic</span>
+                </>
+              )}
           </button>
         </div>
       </form>

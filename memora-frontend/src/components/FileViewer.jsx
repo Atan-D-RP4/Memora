@@ -1,5 +1,14 @@
-import { useState } from 'react';
-import { X, Download, ExternalLink, FileText, Image, Video, Music, File } from 'lucide-react';
+import { useState } from "react";
+import {
+  Download,
+  ExternalLink,
+  File,
+  FileText,
+  Image,
+  Music,
+  Video,
+  X,
+} from "lucide-react";
 
 const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,61 +19,65 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
 
   // Ensure URL is absolute
   const getAbsoluteUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }
     // If it's a relative URL, make it absolute
-    if (url.startsWith('/')) {
+    if (url.startsWith("/")) {
       return `${window.location.origin}${url}`;
     }
     return `${window.location.origin}/${url}`;
   };
 
   const absoluteUrl = getAbsoluteUrl(currentFile.url);
-  
+
   const getFileType = (url, mimeType) => {
     if (mimeType) {
-      if (mimeType.startsWith('image/')) return 'image';
-      if (mimeType.startsWith('video/')) return 'video';
-      if (mimeType.startsWith('audio/')) return 'audio';
-      if (mimeType === 'application/pdf') return 'pdf';
+      if (mimeType.startsWith("image/")) return "image";
+      if (mimeType.startsWith("video/")) return "video";
+      if (mimeType.startsWith("audio/")) return "audio";
+      if (mimeType === "application/pdf") return "pdf";
     }
-    
-    const extension = url.split('.').pop()?.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return 'image';
-    if (['mp4', 'webm', 'ogg', 'avi', 'mov'].includes(extension)) return 'video';
-    if (['mp3', 'wav', 'ogg', 'aac'].includes(extension)) return 'audio';
-    if (extension === 'pdf') return 'pdf';
-    return 'other';
+
+    const extension = url.split(".").pop()?.toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
+      return "image";
+    }
+    if (["mp4", "webm", "ogg", "avi", "mov"].includes(extension)) {
+      return "video";
+    }
+    if (["mp3", "wav", "ogg", "aac"].includes(extension)) return "audio";
+    if (extension === "pdf") return "pdf";
+    return "other";
   };
 
   const fileType = getFileType(absoluteUrl, currentFile.mimetype);
 
   const renderFileContent = () => {
-    console.log('Rendering file:', currentFile);
-    console.log('File type:', fileType);
-    console.log('File URL:', currentFile.url);
+    console.log("Rendering file:", currentFile);
+    console.log("File type:", fileType);
+    console.log("File URL:", currentFile.url);
 
     switch (fileType) {
-      case 'image':
+      case "image":
         return (
           <div className="flex flex-col items-center space-y-4">
             <img
               src={absoluteUrl}
               alt={currentFile.title || currentFile.originalName}
               className="max-w-full max-h-full object-contain"
-              onLoad={() => console.log('Image loaded successfully')}
+              onLoad={() => console.log("Image loaded successfully")}
               onError={(e) => {
-                console.error('Image failed to load:', absoluteUrl);
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
+                console.error("Image failed to load:", absoluteUrl);
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
               }}
             />
-            <div className="text-center" style={{ display: 'none' }}>
+            <div className="text-center" style={{ display: "none" }}>
               <p className="text-red-400">Failed to load image</p>
               <button
-                onClick={() => window.open(absoluteUrl, '_blank')}
+                onClick={() => window.open(absoluteUrl, "_blank")}
                 className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
               >
                 Open in New Tab
@@ -72,21 +85,21 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
             </div>
           </div>
         );
-      
-      case 'video':
+
+      case "video":
         return (
           <video
             controls
             className="max-w-full max-h-full"
             src={absoluteUrl}
-            onLoadStart={() => console.log('Video loading started')}
-            onError={() => console.error('Video failed to load:', absoluteUrl)}
+            onLoadStart={() => console.log("Video loading started")}
+            onError={() => console.error("Video failed to load:", absoluteUrl)}
           >
             Your browser does not support the video tag.
           </video>
         );
 
-      case 'audio':
+      case "audio":
         return (
           <div className="flex flex-col items-center space-y-4">
             <Music className="w-24 h-24 text-blue-400" />
@@ -96,20 +109,20 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
             </audio>
           </div>
         );
-      
-      case 'pdf':
+
+      case "pdf":
         return (
           <div className="w-full h-full flex flex-col">
             <iframe
               src={absoluteUrl}
               className="w-full h-full border-0 bg-white"
               title={currentFile.title || currentFile.originalName}
-              onLoad={() => console.log('PDF loaded successfully')}
-              onError={() => console.error('PDF failed to load:', absoluteUrl)}
+              onLoad={() => console.log("PDF loaded successfully")}
+              onError={() => console.error("PDF failed to load:", absoluteUrl)}
             />
           </div>
         );
-      
+
       default:
         return (
           <div className="flex flex-col items-center space-y-4 text-center">
@@ -122,7 +135,7 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
                 This file type cannot be previewed in the browser.
               </p>
               <button
-                onClick={() => window.open(absoluteUrl, '_blank')}
+                onClick={() => window.open(absoluteUrl, "_blank")}
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
               >
                 <Download className="w-4 h-4" />
@@ -135,7 +148,10 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
   };
 
   const renderErrorFallback = () => (
-    <div className="flex flex-col items-center space-y-4 text-center" style={{ display: 'none' }}>
+    <div
+      className="flex flex-col items-center space-y-4 text-center"
+      style={{ display: "none" }}
+    >
       <File className="w-24 h-24 text-gray-400" />
       <div>
         <h3 className="text-lg font-medium text-white mb-2">
@@ -145,7 +161,7 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
           The file could not be displayed. You can try downloading it instead.
         </p>
         <button
-          onClick={() => window.open(absoluteUrl, '_blank')}
+          onClick={() => window.open(absoluteUrl, "_blank")}
           className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
         >
           <ExternalLink className="w-4 h-4" />
@@ -177,7 +193,10 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
                   {currentIndex + 1} of {files.length}
                 </span>
                 <button
-                  onClick={() => setCurrentIndex(Math.min(files.length - 1, currentIndex + 1))}
+                  onClick={() =>
+                    setCurrentIndex(
+                      Math.min(files.length - 1, currentIndex + 1),
+                    )}
                   disabled={currentIndex === files.length - 1}
                   className="px-2 py-1 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded text-sm transition-colors"
                 >
@@ -186,10 +205,10 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => window.open(absoluteUrl, '_blank')}
+              onClick={() => window.open(absoluteUrl, "_blank")}
               className="p-2 text-gray-400 hover:text-white transition-colors"
               title="Open in new tab"
             >
@@ -214,13 +233,15 @@ const FileViewer = ({ isOpen, onClose, file, files = [] }) => {
         <div className="p-4 border-t border-white/10 flex items-center justify-between">
           <div className="text-sm text-gray-400">
             {currentFile.size && (
-              <span>Size: {(currentFile.size / 1024 / 1024).toFixed(2)} MB</span>
+              <span>
+                Size: {(currentFile.size / 1024 / 1024).toFixed(2)} MB
+              </span>
             )}
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => {
-                const link = document.createElement('a');
+                const link = document.createElement("a");
                 link.href = absoluteUrl;
                 link.download = currentFile.originalName || currentFile.title;
                 document.body.appendChild(link);

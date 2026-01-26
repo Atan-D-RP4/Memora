@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, Calendar, Trophy, Flame, Target } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Calendar, Flame, Mail, Target, Trophy, User, X } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    username: user?.username || '',
-    email: user?.email || ''
+    username: user?.username || "",
+    email: user?.email || "",
   });
 
   const handleEdit = () => {
     setIsEditing(true);
     setEditData({
-      username: user?.username || '',
-      email: user?.email || ''
+      username: user?.username || "",
+      email: user?.email || "",
     });
   };
 
@@ -25,26 +25,26 @@ const ProfileModal = ({ isOpen, onClose }) => {
       // For now, we'll just update the local state
       updateUser(editData);
       setIsEditing(false);
-      console.log('Profile updated:', editData);
+      console.log("Profile updated:", editData);
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.error("Failed to update profile:", error);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditData({
-      username: user?.username || '',
-      email: user?.email || ''
+      username: user?.username || "",
+      email: user?.email || "",
     });
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -62,7 +62,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
             onClick={onClose}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
-          
+
           {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -81,18 +81,19 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             {/* Content */}
             <div className="p-6">
               {/* Avatar Section */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-white text-2xl font-bold">
-                    {user.username?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                    {user.username?.charAt(0).toUpperCase() ||
+                      user.email?.charAt(0).toUpperCase() || "U"}
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold text-white">
-                  {user.username || user.email?.split('@')[0] || 'User'}
+                  {user.username || user.email?.split("@")[0] || "User"}
                 </h3>
               </div>
 
@@ -104,19 +105,25 @@ const ProfileModal = ({ isOpen, onClose }) => {
                     <User className="w-4 h-4 inline mr-2" />
                     Username
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={editData.username}
-                      onChange={(e) => setEditData({ ...editData, username: e.target.value })}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
-                      placeholder="Enter username"
-                    />
-                  ) : (
-                    <div className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white">
-                      {user.username || 'Not set'}
-                    </div>
-                  )}
+                  {isEditing
+                    ? (
+                      <input
+                        type="text"
+                        value={editData.username}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            username: e.target.value,
+                          })}
+                        className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                        placeholder="Enter username"
+                      />
+                    )
+                    : (
+                      <div className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white">
+                        {user.username || "Not set"}
+                      </div>
+                    )}
                 </div>
 
                 {/* Email */}
@@ -132,13 +139,17 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
                 {/* Stats Section */}
                 <div className="pt-4 border-t border-white/10">
-                  <h4 className="text-sm font-medium text-gray-400 mb-3">Statistics</h4>
+                  <h4 className="text-sm font-medium text-gray-400 mb-3">
+                    Statistics
+                  </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-white/5 rounded-lg">
                       <div className="text-lg font-semibold text-blue-400">
-                        {user.memScore !== undefined ? 
-                          (user.memScore > 10 ? (user.memScore / 10).toFixed(1) : user.memScore.toFixed(1)) 
-                          : 'N/A'}
+                        {user.memScore !== undefined
+                          ? (user.memScore > 10
+                            ? (user.memScore / 10).toFixed(1)
+                            : user.memScore.toFixed(1))
+                          : "N/A"}
                       </div>
                       <div className="text-xs text-gray-400">MemScore</div>
                     </div>
@@ -147,7 +158,9 @@ const ProfileModal = ({ isOpen, onClose }) => {
                         <Flame className="w-4 h-4 mr-1" />
                         {user.currentStreak || 0}
                       </div>
-                      <div className="text-xs text-gray-400">Current Streak</div>
+                      <div className="text-xs text-gray-400">
+                        Current Streak
+                      </div>
                     </div>
                     <div className="text-center p-3 bg-white/5 rounded-lg">
                       <div className="text-lg font-semibold text-yellow-400 flex items-center justify-center">
@@ -176,29 +189,31 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
               {/* Action Buttons */}
               <div className="flex space-x-3 mt-6">
-                {isEditing ? (
-                  <>
+                {isEditing
+                  ? (
+                    <>
+                      <button
+                        onClick={handleCancel}
+                        className="flex-1 px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      >
+                        Save Changes
+                      </button>
+                    </>
+                  )
+                  : (
                     <button
-                      onClick={handleCancel}
-                      className="flex-1 px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                      onClick={handleEdit}
+                      className="w-full px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                     >
-                      Cancel
+                      Edit Profile
                     </button>
-                    <button
-                      onClick={handleSave}
-                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                    >
-                      Save Changes
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleEdit}
-                    className="w-full px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                  >
-                    Edit Profile
-                  </button>
-                )}
+                  )}
               </div>
             </div>
           </motion.div>

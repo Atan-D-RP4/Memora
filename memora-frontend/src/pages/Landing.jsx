@@ -1,11 +1,26 @@
-import React, { useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Brain, Target, Calendar, Flag, ChevronDown, Clock, FileText, Play, BarChart3, Zap, Users, Smartphone, LogOut } from 'lucide-react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import Logo from '../components/Logo';
-import logoImg from '../assets/logo.jpg';
-import UserProfileDropdown from '../components/UserProfileDropdown';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  BarChart3,
+  Brain,
+  Calendar,
+  ChevronDown,
+  Clock,
+  FileText,
+  Flag,
+  LogOut,
+  Play,
+  Smartphone,
+  Target,
+  Users,
+  Zap,
+} from "lucide-react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import Logo from "../components/Logo";
+import logoImg from "../assets/logo.jpg";
+import UserProfileDropdown from "../components/UserProfileDropdown";
+import { useAuth } from "../contexts/AuthContext";
 
 // Floating Particles Component
 const FloatingParticles = () => {
@@ -16,18 +31,22 @@ const FloatingParticles = () => {
           key={i}
           className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
           initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+            x: Math.random() *
+              (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() *
+              (typeof window !== "undefined" ? window.innerHeight : 800),
           }}
           animate={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+            x: Math.random() *
+              (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() *
+              (typeof window !== "undefined" ? window.innerHeight : 800),
           }}
           transition={{
             duration: Math.random() * 15 + 10,
             repeat: Infinity,
             repeatType: "reverse",
-            ease: "linear"
+            ease: "linear",
           }}
         />
       ))}
@@ -37,20 +56,24 @@ const FloatingParticles = () => {
           key={`large-${i}`}
           className="absolute w-2 h-2 bg-purple-400/10 rounded-full"
           initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+            x: Math.random() *
+              (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() *
+              (typeof window !== "undefined" ? window.innerHeight : 800),
           }}
           animate={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+            x: Math.random() *
+              (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() *
+              (typeof window !== "undefined" ? window.innerHeight : 800),
             scale: [1, 1.5, 1],
-            opacity: [0.1, 0.3, 0.1]
+            opacity: [0.1, 0.3, 0.1],
           }}
           transition={{
             duration: Math.random() * 25 + 15,
             repeat: Infinity,
             repeatType: "reverse",
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
       ))}
@@ -85,7 +108,7 @@ function Landing() {
       await logout();
       // Stay on landing page after logout
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -115,32 +138,51 @@ function Landing() {
                 <span className="font-semibold text-lg">Memora</span>
               </motion.div>
               <div className="hidden lg:flex items-center space-x-6">
-                <a href="#features" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <a
+                  href="#features"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                >
                   Features
                 </a>
-                <a href="#pricing" className="text-gray-400 hover:text-white transition-colors text-sm">
+                <a
+                  href="#pricing"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                >
                   Pricing
                 </a>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {user ? (
-                // Authenticated user
-                <div className="flex items-center space-x-4">
-                  <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors text-sm">
-                    Dashboard
-                  </Link>
-                  <UserProfileDropdown />
-                </div>
-              ) : (
-                // Not authenticated
-                <>
-                  <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm">Sign In</Link>
-                  <Link to="/signup" className="bg-white text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors">
-                    Sign Up
-                  </Link>
-                </>
-              )}
+              {user
+                ? (
+                  // Authenticated user
+                  <div className="flex items-center space-x-4">
+                    <Link
+                      to="/dashboard"
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      Dashboard
+                    </Link>
+                    <UserProfileDropdown />
+                  </div>
+                )
+                : (
+                  // Not authenticated
+                  <>
+                    <Link
+                      to="/login"
+                      className="text-gray-400 hover:text-white transition-colors text-sm"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="bg-white text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
             </div>
           </div>
         </div>
@@ -157,13 +199,13 @@ function Landing() {
               "radial-gradient(600px circle at 100% 100%, rgba(120, 119, 198, 0.3), transparent 50%)",
               "radial-gradient(600px circle at 0% 100%, rgba(120, 119, 198, 0.3), transparent 50%)",
               "radial-gradient(600px circle at 100% 0%, rgba(120, 119, 198, 0.3), transparent 50%)",
-              "radial-gradient(600px circle at 0% 0%, rgba(120, 119, 198, 0.3), transparent 50%)"
-            ]
+              "radial-gradient(600px circle at 0% 0%, rgba(120, 119, 198, 0.3), transparent 50%)",
+            ],
           }}
           transition={{
             duration: 20,
             repeat: Infinity,
-            ease: "linear"
+            ease: "linear",
           }}
         />
 
@@ -177,13 +219,16 @@ function Landing() {
           animate={{ opacity: 0.2 }}
           transition={{ duration: 2 }}
         >
-          <div className="h-full w-full" style={{
-            backgroundImage: `
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `
               linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '100px 100px'
-          }}>
+              backgroundSize: "100px 100px",
+            }}
+          >
           </div>
         </motion.div>
 
@@ -195,8 +240,10 @@ function Landing() {
           transition={{ duration: 1, delay: 1.2 }}
         >
           <div className="w-3 h-3 relative">
-            <div className="absolute top-1/2 left-0 w-full h-px bg-white/30"></div>
-            <div className="absolute left-1/2 top-0 w-px h-full bg-white/30"></div>
+            <div className="absolute top-1/2 left-0 w-full h-px bg-white/30">
+            </div>
+            <div className="absolute left-1/2 top-0 w-px h-full bg-white/30">
+            </div>
           </div>
         </motion.div>
         <motion.div
@@ -206,8 +253,10 @@ function Landing() {
           transition={{ duration: 1, delay: 1.4 }}
         >
           <div className="w-3 h-3 relative">
-            <div className="absolute top-1/2 left-0 w-full h-px bg-white/30"></div>
-            <div className="absolute left-1/2 top-0 w-px h-full bg-white/30"></div>
+            <div className="absolute top-1/2 left-0 w-full h-px bg-white/30">
+            </div>
+            <div className="absolute left-1/2 top-0 w-px h-full bg-white/30">
+            </div>
           </div>
         </motion.div>
 
@@ -244,8 +293,9 @@ function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
             >
-              Master any subject with scientifically-proven spaced repetition. Transform how you learn,
-              remember, and retain knowledge with personalized study schedules that adapt to your progress.
+              Master any subject with scientifically-proven spaced repetition.
+              Transform how you learn, remember, and retain knowledge with
+              personalized study schedules that adapt to your progress.
             </motion.p>
 
             <motion.div
@@ -255,23 +305,33 @@ function Landing() {
               transition={{ duration: 0.8, delay: 1.0 }}
             >
               <motion.div
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(255,255,255,0.1)" }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 10px 25px rgba(255,255,255,0.1)",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link to="/dashboard" className="bg-white text-black px-8 py-3 rounded-md font-medium hover:bg-gray-100 transition-all duration-300 flex items-center group">
+                <Link
+                  to="/dashboard"
+                  className="bg-white text-black px-8 py-3 rounded-md font-medium hover:bg-gray-100 transition-all duration-300 flex items-center group"
+                >
                   <motion.div
                     animate={{
                       scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0]
+                      rotate: [0, 5, -5, 0],
                     }}
                     transition={{
                       duration: 3,
                       repeat: Infinity,
                       repeatType: "reverse",
-                      ease: "easeInOut"
+                      ease: "easeInOut",
                     }}
                   >
-                    <Logo size="sm" className="text-black mr-2" variant="blackOutline" />
+                    <Logo
+                      size="sm"
+                      className="text-black mr-2"
+                      variant="blackOutline"
+                    />
                   </motion.div>
                   Start Learning Free
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -279,7 +339,10 @@ function Landing() {
               </motion.div>
               <motion.button
                 className="border border-white/20 text-white px-8 py-3 rounded-md font-medium hover:bg-white/5 transition-all duration-300"
-                whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.4)" }}
+                whileHover={{
+                  scale: 1.05,
+                  borderColor: "rgba(255,255,255,0.4)",
+                }}
                 whileTap={{ scale: 0.95 }}
               >
                 Get a Demo
@@ -293,18 +356,20 @@ function Landing() {
       <div className="relative">
         {/* Grid lines */}
         <div className="absolute inset-0 opacity-10">
-          <div className="h-full w-full" style={{
-            backgroundImage: `
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `
               linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '100px 100px'
-          }}>
+              backgroundSize: "100px 100px",
+            }}
+          >
           </div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-
           {/* Neuro Engine Deep Dive Section */}
           <motion.div
             className="mt-16"
@@ -330,63 +395,99 @@ function Landing() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 viewport={{ once: false }}
               >
-                Our proprietary algorithm leverages the Ebbinghaus Forgetting Curve to optimize your learning schedule,
-                ensuring maximum retention with minimal effort.
+                Our proprietary algorithm leverages the Ebbinghaus Forgetting
+                Curve to optimize your learning schedule, ensuring maximum
+                retention with minimal effort.
               </motion.p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-px">
-
               {/* Forgetting Curve Visualization */}
               <div className="relative border border-white/20 p-8 bg-black">
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-4">The Science Behind Spaced Repetition</h3>
+                <h3 className="text-xl font-bold mb-4">
+                  The Science Behind Spaced Repetition
+                </h3>
                 <p className="text-gray-400 text-sm mb-8">
-                  Traditional learning wastes time. Our algorithm identifies the optimal moment to review,
-                  just before you forget, maximizing retention efficiency.
+                  Traditional learning wastes time. Our algorithm identifies the
+                  optimal moment to review, just before you forget, maximizing
+                  retention efficiency.
                 </p>
 
                 {/* Forgetting curve chart */}
                 <div className="relative h-48 mb-6">
-                  <div className="absolute bottom-0 left-0 w-full h-px bg-white/20"></div>
-                  <div className="absolute bottom-0 left-0 w-px h-full bg-white/20"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-px bg-white/20">
+                  </div>
+                  <div className="absolute bottom-0 left-0 w-px h-full bg-white/20">
+                  </div>
 
                   {/* Traditional curve (declining) */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200">
-                    <path d="M 20 40 Q 100 80 150 120 Q 200 150 280 170"
-                          stroke="#ef4444" strokeWidth="2" fill="none" strokeDasharray="5,5" />
-                    <text x="200" y="180" className="text-xs fill-red-400">Traditional Learning</text>
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 300 200"
+                  >
+                    <path
+                      d="M 20 40 Q 100 80 150 120 Q 200 150 280 170"
+                      stroke="#ef4444"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeDasharray="5,5"
+                    />
+                    <text x="200" y="180" className="text-xs fill-red-400">
+                      Traditional Learning
+                    </text>
                   </svg>
 
                   {/* Spaced repetition curve (maintained) */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200">
-                    <path d="M 20 40 Q 60 50 80 45 Q 120 55 140 50 Q 180 60 200 55 Q 240 65 280 60"
-                          stroke="#22c55e" strokeWidth="2" fill="none" />
-                    <text x="150" y="35" className="text-xs fill-green-400">Memora's Approach</text>
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 300 200"
+                  >
+                    <path
+                      d="M 20 40 Q 60 50 80 45 Q 120 55 140 50 Q 180 60 200 55 Q 240 65 280 60"
+                      stroke="#22c55e"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                    <text x="150" y="35" className="text-xs fill-green-400">
+                      Memora's Approach
+                    </text>
                   </svg>
 
                   {/* Review points */}
-                  <div className="absolute bottom-8 left-20 w-2 h-2 bg-green-400 rounded-full"></div>
-                  <div className="absolute bottom-6 left-32 w-2 h-2 bg-green-400 rounded-full"></div>
-                  <div className="absolute bottom-5 left-48 w-2 h-2 bg-green-400 rounded-full"></div>
-                  <div className="absolute bottom-4 left-64 w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="absolute bottom-8 left-20 w-2 h-2 bg-green-400 rounded-full">
+                  </div>
+                  <div className="absolute bottom-6 left-32 w-2 h-2 bg-green-400 rounded-full">
+                  </div>
+                  <div className="absolute bottom-5 left-48 w-2 h-2 bg-green-400 rounded-full">
+                  </div>
+                  <div className="absolute bottom-4 left-64 w-2 h-2 bg-green-400 rounded-full">
+                  </div>
                 </div>
 
                 <div className="text-xs text-gray-500">
@@ -399,23 +500,33 @@ function Landing() {
               <div className="relative border border-white/20 p-8 bg-black">
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-6">Adaptive Intelligence</h3>
+                <h3 className="text-xl font-bold mb-6">
+                  Adaptive Intelligence
+                </h3>
 
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
@@ -423,8 +534,13 @@ function Landing() {
                       <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1">Personal Learning Patterns</h4>
-                      <p className="text-gray-400 text-sm">Analyzes your response accuracy and timing to create a unique cognitive profile.</p>
+                      <h4 className="font-semibold mb-1">
+                        Personal Learning Patterns
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        Analyzes your response accuracy and timing to create a
+                        unique cognitive profile.
+                      </p>
                     </div>
                   </div>
 
@@ -433,8 +549,13 @@ function Landing() {
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1">Dynamic Interval Adjustment</h4>
-                      <p className="text-gray-400 text-sm">Automatically adjusts review intervals based on your performance and retention strength.</p>
+                      <h4 className="font-semibold mb-1">
+                        Dynamic Interval Adjustment
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        Automatically adjusts review intervals based on your
+                        performance and retention strength.
+                      </p>
                     </div>
                   </div>
 
@@ -443,8 +564,13 @@ function Landing() {
                       <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1">Difficulty Calibration</h4>
-                      <p className="text-gray-400 text-sm">Identifies challenging concepts and increases review frequency to strengthen weak areas.</p>
+                      <h4 className="font-semibold mb-1">
+                        Difficulty Calibration
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        Identifies challenging concepts and increases review
+                        frequency to strengthen weak areas.
+                      </p>
                     </div>
                   </div>
 
@@ -453,13 +579,17 @@ function Landing() {
                       <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-1">Optimal Timing Prediction</h4>
-                      <p className="text-gray-400 text-sm">Predicts the exact moment when memory begins to fade, scheduling reviews for maximum impact.</p>
+                      <h4 className="font-semibold mb-1">
+                        Optimal Timing Prediction
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        Predicts the exact moment when memory begins to fade,
+                        scheduling reviews for maximum impact.
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
           </motion.div>
 
@@ -492,7 +622,6 @@ function Landing() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: false }}
             >
-
               {/* ReviseBy Feature */}
               <motion.div
                 className="relative border border-white/20 p-8 bg-black group"
@@ -503,45 +632,63 @@ function Landing() {
                 whileHover={{
                   boxShadow: "0 15px 30px rgba(59, 130, 246, 0.2)",
                   borderColor: "rgba(59, 130, 246, 0.6)",
-                  transition: { duration: 0.15 }
+                  transition: { duration: 0.15 },
                 }}
               >
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
                 <div className="flex items-center mb-4">
                   <Clock className="w-5 h-5 text-blue-400 mr-2" />
-                  <span className="text-xs text-gray-400 uppercase tracking-wide">Smart Scheduling</span>
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">
+                    Smart Scheduling
+                  </span>
                 </div>
 
-                <h3 className="text-lg font-semibold mb-2">ReviseBy deadlines</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  ReviseBy deadlines
+                </h3>
                 <p className="text-gray-400 text-sm mb-6">
-                  Automatically schedule optimal review sessions to prevent cramming and ensure long-term retention before critical deadlines.
+                  Automatically schedule optimal review sessions to prevent
+                  cramming and ensure long-term retention before critical
+                  deadlines.
                 </p>
 
                 <div className="space-y-2 mb-6">
                   <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded border border-white/10">
                     <span className="text-sm">Organic Chemistry</span>
-                    <span className="text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded">Due tomorrow</span>
+                    <span className="text-xs text-red-400 bg-red-400/10 px-2 py-1 rounded">
+                      Due tomorrow
+                    </span>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded border border-white/10">
                     <span className="text-sm">Statistics Final</span>
-                    <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded">Review in 3 days</span>
+                    <span className="text-xs text-orange-400 bg-orange-400/10 px-2 py-1 rounded">
+                      Review in 3 days
+                    </span>
                   </div>
                 </div>
 
@@ -560,35 +707,48 @@ function Landing() {
                 whileHover={{
                   boxShadow: "0 15px 30px rgba(34, 197, 94, 0.2)",
                   borderColor: "rgba(34, 197, 94, 0.6)",
-                  transition: { duration: 0.15 }
+                  transition: { duration: 0.15 },
                 }}
               >
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
                 <div className="flex items-center mb-4">
                   <FileText className="w-5 h-5 text-green-400 mr-2" />
-                  <span className="text-xs text-gray-400 uppercase tracking-wide">Organization</span>
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">
+                    Organization
+                  </span>
                 </div>
 
-                <h3 className="text-lg font-semibold mb-2">DocTags management</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  DocTags management
+                </h3>
                 <p className="text-gray-400 text-sm mb-6">
-                  Attach PDFs, YouTube videos, and Google Drive files with intelligent tagging for instant organization and retrieval.
+                  Attach PDFs, YouTube videos, and Google Drive files with
+                  intelligent tagging for instant organization and retrieval.
                 </p>
 
                 <div className="grid grid-cols-2 gap-2 mb-6">
@@ -603,9 +763,15 @@ function Landing() {
                 </div>
 
                 <div className="flex flex-wrap gap-1 mb-4">
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Theory</span>
-                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Practice</span>
-                  <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">Research</span>
+                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                    Theory
+                  </span>
+                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
+                    Practice
+                  </span>
+                  <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
+                    Research
+                  </span>
                 </div>
 
                 <button className="w-10 h-10 border border-gray-600 rounded-full flex items-center justify-center text-gray-400 hover:bg-white hover:text-black hover:border-white transition-all duration-300">
@@ -623,46 +789,81 @@ function Landing() {
                 whileHover={{
                   boxShadow: "0 15px 30px rgba(168, 85, 247, 0.2)",
                   borderColor: "rgba(168, 85, 247, 0.6)",
-                  transition: { duration: 0.15 }
+                  transition: { duration: 0.15 },
                 }}
               >
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
                 <div className="flex items-center mb-4">
                   <BarChart3 className="w-5 h-5 text-purple-400 mr-2" />
-                  <span className="text-xs text-gray-400 uppercase tracking-wide">Analytics</span>
+                  <span className="text-xs text-gray-400 uppercase tracking-wide">
+                    Analytics
+                  </span>
                 </div>
 
-                <h3 className="text-lg font-semibold mb-2">Performance insights</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Performance insights
+                </h3>
                 <p className="text-gray-400 text-sm mb-6">
-                  Track your learning velocity, retention rates, and identify knowledge gaps with detailed analytics and progress visualization.
+                  Track your learning velocity, retention rates, and identify
+                  knowledge gaps with detailed analytics and progress
+                  visualization.
                 </p>
 
                 {/* Mini chart */}
                 <div className="h-16 mb-4 relative">
-                  <div className="absolute bottom-0 left-0 w-full h-px bg-white/20"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-px bg-white/20">
+                  </div>
                   <div className="flex items-end justify-between h-full">
-                    <div className="w-4 bg-blue-400 rounded-t" style={{height: '60%'}}></div>
-                    <div className="w-4 bg-green-400 rounded-t" style={{height: '80%'}}></div>
-                    <div className="w-4 bg-purple-400 rounded-t" style={{height: '45%'}}></div>
-                    <div className="w-4 bg-orange-400 rounded-t" style={{height: '90%'}}></div>
-                    <div className="w-4 bg-cyan-400 rounded-t" style={{height: '70%'}}></div>
+                    <div
+                      className="w-4 bg-blue-400 rounded-t"
+                      style={{ height: "60%" }}
+                    >
+                    </div>
+                    <div
+                      className="w-4 bg-green-400 rounded-t"
+                      style={{ height: "80%" }}
+                    >
+                    </div>
+                    <div
+                      className="w-4 bg-purple-400 rounded-t"
+                      style={{ height: "45%" }}
+                    >
+                    </div>
+                    <div
+                      className="w-4 bg-orange-400 rounded-t"
+                      style={{ height: "90%" }}
+                    >
+                    </div>
+                    <div
+                      className="w-4 bg-cyan-400 rounded-t"
+                      style={{ height: "70%" }}
+                    >
+                    </div>
                   </div>
                 </div>
 
@@ -675,7 +876,6 @@ function Landing() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
-
             </motion.div>
 
             {/* Second row of features */}
@@ -686,7 +886,6 @@ function Landing() {
               transition={{ duration: 0.6, delay: 0.5 }}
               viewport={{ once: false }}
             >
-
               {/* Advanced Learning Features */}
               <motion.div
                 className="relative border border-white/20 p-8 bg-black group"
@@ -697,44 +896,60 @@ function Landing() {
                 whileHover={{
                   boxShadow: "0 12px 25px rgba(168, 85, 247, 0.2)",
                   borderColor: "rgba(168, 85, 247, 0.6)",
-                  transition: { duration: 0.15 }
+                  transition: { duration: 0.15 },
                 }}
               >
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-6">Advanced learning capabilities</h3>
+                <h3 className="text-xl font-bold mb-6">
+                  Advanced learning capabilities
+                </h3>
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center p-4 border border-white/10 rounded">
                     <Zap className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
                     <div className="text-sm font-semibold">Quick Reviews</div>
-                    <div className="text-xs text-gray-400">Micro-learning sessions</div>
+                    <div className="text-xs text-gray-400">
+                      Micro-learning sessions
+                    </div>
                   </div>
                   <div className="text-center p-4 border border-white/10 rounded">
                     <Target className="w-8 h-8 text-red-400 mx-auto mb-2" />
                     <div className="text-sm font-semibold">Focus Mode</div>
-                    <div className="text-xs text-gray-400">Distraction-free learning</div>
+                    <div className="text-xs text-gray-400">
+                      Distraction-free learning
+                    </div>
                   </div>
                   <div className="text-center p-4 border border-white/10 rounded">
                     <Users className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                     <div className="text-sm font-semibold">Study Groups</div>
-                    <div className="text-xs text-gray-400">Collaborative learning</div>
+                    <div className="text-xs text-gray-400">
+                      Collaborative learning
+                    </div>
                   </div>
                   <div className="text-center p-4 border border-white/10 rounded">
                     <Smartphone className="w-8 h-8 text-green-400 mx-auto mb-2" />
@@ -758,30 +973,41 @@ function Landing() {
                 whileHover={{
                   boxShadow: "0 12px 25px rgba(34, 197, 94, 0.2)",
                   borderColor: "rgba(34, 197, 94, 0.6)",
-                  transition: { duration: 0.15 }
+                  transition: { duration: 0.15 },
                 }}
               >
                 {/* Corner plus signs */}
                 <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
                 <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                  <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                  </div>
+                  <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold mb-6">Seamless integrations</h3>
+                <h3 className="text-xl font-bold mb-6">
+                  Seamless integrations
+                </h3>
                 <p className="text-gray-400 text-sm mb-8">
-                  Connect with your existing workflow. Import from popular platforms and export your progress anywhere.
+                  Connect with your existing workflow. Import from popular
+                  platforms and export your progress anywhere.
                 </p>
 
                 <div className="grid grid-cols-3 gap-4 mb-6">
@@ -813,7 +1039,6 @@ function Landing() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.div>
-
             </motion.div>
           </motion.div>
 
@@ -825,7 +1050,6 @@ function Landing() {
             transition={{ duration: 0.6, delay: 0.7 }}
             viewport={{ once: false }}
           >
-
             {/* Neuro Engine Card */}
             <motion.div
               className="relative border border-white/20 p-8 bg-black group"
@@ -836,34 +1060,46 @@ function Landing() {
               whileHover={{
                 boxShadow: "0 15px 30px rgba(168, 85, 247, 0.2)",
                 borderColor: "rgba(168, 85, 247, 0.6)",
-                transition: { duration: 0.15 }
+                transition: { duration: 0.15 },
               }}
             >
               {/* Corner plus signs */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <div className="flex items-center mb-4">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                <span className="text-xs text-gray-400 uppercase tracking-wide">Intelligence</span>
+                <span className="text-xs text-gray-400 uppercase tracking-wide">
+                  Intelligence
+                </span>
               </div>
 
               <h3 className="text-xl font-bold mb-2">Neuro Engine</h3>
-              <h4 className="text-lg text-gray-300 mb-4">powers your learning.</h4>
+              <h4 className="text-lg text-gray-300 mb-4">
+                powers your learning.
+              </h4>
 
               <p className="text-gray-400 text-sm mb-8">
                 AI-powered spaced repetition that adapts to your patterns.
@@ -876,11 +1112,22 @@ function Landing() {
                     <Brain className="w-8 h-8 text-white" />
                   </div>
                   {/* Orbiting dots */}
-                  <div className="absolute w-24 h-24 border border-white/10 rounded-full animate-spin" style={{animationDuration: '10s'}}>
-                    <div className="absolute -top-1 left-1/2 w-2 h-2 bg-blue-400 rounded-full transform -translate-x-1/2"></div>
+                  <div
+                    className="absolute w-24 h-24 border border-white/10 rounded-full animate-spin"
+                    style={{ animationDuration: "10s" }}
+                  >
+                    <div className="absolute -top-1 left-1/2 w-2 h-2 bg-blue-400 rounded-full transform -translate-x-1/2">
+                    </div>
                   </div>
-                  <div className="absolute w-32 h-32 border border-white/5 rounded-full animate-spin" style={{animationDuration: '15s', animationDirection: 'reverse'}}>
-                    <div className="absolute -top-1 left-1/2 w-2 h-2 bg-green-400 rounded-full transform -translate-x-1/2"></div>
+                  <div
+                    className="absolute w-32 h-32 border border-white/5 rounded-full animate-spin"
+                    style={{
+                      animationDuration: "15s",
+                      animationDirection: "reverse",
+                    }}
+                  >
+                    <div className="absolute -top-1 left-1/2 w-2 h-2 bg-green-400 rounded-full transform -translate-x-1/2">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -900,41 +1147,74 @@ function Landing() {
               whileHover={{
                 boxShadow: "0 15px 30px rgba(34, 197, 94, 0.2)",
                 borderColor: "rgba(34, 197, 94, 0.6)",
-                transition: { duration: 0.15 }
+                transition: { duration: 0.15 },
               }}
             >
               {/* Corner plus signs */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <div className="space-y-6">
                 {/* Header */}
                 <div className="text-center">
-                  <div className="text-xs text-gray-400 mb-2">Your Memory Intelligence</div>
-                  <div className="text-2xl font-bold text-green-400 mb-1">MemScore</div>
+                  <div className="text-xs text-gray-400 mb-2">
+                    Your Memory Intelligence
+                  </div>
+                  <div className="text-2xl font-bold text-green-400 mb-1">
+                    MemScore
+                  </div>
                 </div>
 
                 {/* Main Score Display */}
                 <div className="flex items-center justify-center space-x-6">
                   {/* Circular progress indicator */}
                   <div className="relative w-16 h-16">
-                    <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
-                      <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="6" fill="none" className="text-gray-800" />
-                      <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" className="text-green-400" strokeDasharray={`${9 * 1.5} 150`} />
+                    <svg
+                      className="w-16 h-16 transform -rotate-90"
+                      viewBox="0 0 64 64"
+                    >
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="24"
+                        stroke="currentColor"
+                        strokeWidth="6"
+                        fill="none"
+                        className="text-gray-800"
+                      />
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="24"
+                        stroke="currentColor"
+                        strokeWidth="6"
+                        fill="none"
+                        strokeLinecap="round"
+                        className="text-green-400"
+                        strokeDasharray={`${9 * 1.5} 150`}
+                      />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-2xl font-bold text-green-400">9</div>
@@ -943,11 +1223,18 @@ function Landing() {
 
                   {/* Score Details */}
                   <div className="text-left">
-                    <div className="text-sm text-gray-300 mb-1">Excellent Memory</div>
-                    <div className="text-xs text-gray-400">Top 15% of learners</div>
+                    <div className="text-sm text-gray-300 mb-1">
+                      Excellent Memory
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      Top 15% of learners
+                    </div>
                     <div className="flex items-center mt-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                      <span className="text-xs text-green-400">Active Learning</span>
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse">
+                      </div>
+                      <span className="text-xs text-green-400">
+                        Active Learning
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -959,7 +1246,9 @@ function Landing() {
                     <div className="text-xs text-gray-400">Retention Rate</div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                    <div className="text-lg font-bold text-purple-400">2.3x</div>
+                    <div className="text-lg font-bold text-purple-400">
+                      2.3x
+                    </div>
                     <div className="text-xs text-gray-400">Learning Speed</div>
                   </div>
                 </div>
@@ -967,11 +1256,17 @@ function Landing() {
                 {/* Progress Indicators */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-400">Memory Strength</span>
+                    <span className="text-xs text-gray-400">
+                      Memory Strength
+                    </span>
                     <span className="text-xs text-green-400">Strong</span>
                   </div>
                   <div className="w-full bg-gray-800 rounded-full h-1.5">
-                    <div className="bg-gradient-to-r from-green-500 to-green-400 h-1.5 rounded-full" style={{width: '90%'}}></div>
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-green-400 h-1.5 rounded-full"
+                      style={{ width: "90%" }}
+                    >
+                    </div>
                   </div>
                 </div>
               </div>
@@ -991,25 +1286,33 @@ function Landing() {
               whileHover={{
                 boxShadow: "0 15px 30px rgba(59, 130, 246, 0.2)",
                 borderColor: "rgba(59, 130, 246, 0.6)",
-                transition: { duration: 0.15 }
+                transition: { duration: 0.15 },
               }}
             >
               {/* Corner plus signs */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <div className="text-center mb-6">
@@ -1019,12 +1322,18 @@ function Landing() {
 
               {/* Grid pattern visualization */}
               <div className="grid grid-cols-5 gap-1 mb-6">
-                {Array.from({length: 25}).map((_, i) => (
-                  <div key={i} className={`w-3 h-3 rounded-sm ${
-                    i < 15 ? 'bg-blue-400' :
-                    i < 20 ? 'bg-green-400' :
-                    'bg-gray-700'
-                  }`}></div>
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-3 h-3 rounded-sm ${
+                      i < 15
+                        ? "bg-blue-400"
+                        : i < 20
+                        ? "bg-green-400"
+                        : "bg-gray-700"
+                    }`}
+                  >
+                  </div>
                 ))}
               </div>
 
@@ -1047,9 +1356,7 @@ function Landing() {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </motion.div>
-
           </motion.div>
-
         </div>
       </div>
 
@@ -1062,47 +1369,64 @@ function Landing() {
         viewport={{ once: false, margin: "-100px" }}
       >
         <div className="absolute inset-0 opacity-10">
-          <div className="h-full w-full" style={{
-            backgroundImage: `
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `
               linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '100px 100px'
-          }}>
+              backgroundSize: "100px 100px",
+            }}
+          >
           </div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-8">Trusted by learners worldwide</h2>
+            <h2 className="text-4xl font-bold mb-8">
+              Trusted by learners worldwide
+            </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              See how Memora has transformed the learning experience for students, professionals, and lifelong learners.
+              See how Memora has transformed the learning experience for
+              students, professionals, and lifelong learners.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
             {/* Testimonial 1 */}
             <div className="relative border border-white/20 p-8 bg-black rounded-lg">
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <blockquote className="text-lg text-gray-300 mb-6 leading-relaxed">
-                "Switching to Memora transformed our medical school study group, reducing our collective study time from 6 hours daily to 2 hours while achieving 95% retention rates on board exams. The ReviseBy feature alone prevented three all-nighters before our anatomy final."
+                "Switching to Memora transformed our medical school study group,
+                reducing our collective study time from 6 hours daily to 2 hours
+                while achieving 95% retention rates on board exams. The ReviseBy
+                feature alone prevented three all-nighters before our anatomy
+                final."
               </blockquote>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
@@ -1110,7 +1434,10 @@ function Landing() {
                 </div>
                 <div>
                   <div className="text-white font-semibold">Sarah Chen</div>
-                  <div className="text-gray-400 text-sm">4th Year Medical Student, Stanford University School of Medicine</div>
+                  <div className="text-gray-400 text-sm">
+                    4th Year Medical Student, Stanford University School of
+                    Medicine
+                  </div>
                 </div>
               </div>
             </div>
@@ -1118,32 +1445,48 @@ function Landing() {
             {/* Testimonial 2 */}
             <div className="relative border border-white/20 p-8 bg-black rounded-lg">
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <blockquote className="text-lg text-gray-300 mb-6 leading-relaxed">
-                "As a software engineer preparing for technical interviews, Memora's algorithm helped me retain complex data structures and algorithms effortlessly. I landed my dream job at Google after just 3 months of consistent practice. The MemScore tracking kept me motivated throughout."
+                "As a software engineer preparing for technical interviews,
+                Memora's algorithm helped me retain complex data structures and
+                algorithms effortlessly. I landed my dream job at Google after
+                just 3 months of consistent practice. The MemScore tracking kept
+                me motivated throughout."
               </blockquote>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-lg">M</span>
                 </div>
                 <div>
-                  <div className="text-white font-semibold">Marcus Rodriguez</div>
-                  <div className="text-gray-400 text-sm">Senior Software Engineer, Google</div>
+                  <div className="text-white font-semibold">
+                    Marcus Rodriguez
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    Senior Software Engineer, Google
+                  </div>
                 </div>
               </div>
             </div>
@@ -1151,24 +1494,36 @@ function Landing() {
             {/* Testimonial 3 */}
             <div className="relative border border-white/20 p-8 bg-black rounded-lg">
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <blockquote className="text-lg text-gray-300 mb-6 leading-relaxed">
-                "Learning Mandarin seemed impossible until I discovered Memora. The DocTags feature let me organize video lessons, PDFs, and audio files seamlessly. After 8 months, I achieved HSK Level 4 proficiency. The Chronicle feature showed my incredible progress journey."
+                "Learning Mandarin seemed impossible until I discovered Memora.
+                The DocTags feature let me organize video lessons, PDFs, and
+                audio files seamlessly. After 8 months, I achieved HSK Level 4
+                proficiency. The Chronicle feature showed my incredible progress
+                journey."
               </blockquote>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center">
@@ -1176,11 +1531,12 @@ function Landing() {
                 </div>
                 <div>
                   <div className="text-white font-semibold">Aisha Patel</div>
-                  <div className="text-gray-400 text-sm">International Business Consultant</div>
+                  <div className="text-gray-400 text-sm">
+                    International Business Consultant
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </motion.div>
@@ -1188,41 +1544,59 @@ function Landing() {
       {/* Final CTA section */}
       <div className="relative py-20">
         <div className="absolute inset-0 opacity-10">
-          <div className="h-full w-full" style={{
-            backgroundImage: `
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `
               linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '100px 100px'
-          }}>
+              backgroundSize: "100px 100px",
+            }}
+          >
           </div>
         </div>
 
-        <div id="pricing" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          id="pricing"
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-px">
-
             {/* Ready to learn */}
             <div className="relative border border-white/20 p-8">
               {/* Corner plus signs */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
-              <h3 className="text-xl font-semibold mb-4">Ready to optimize your learning?</h3>
-              <p className="text-gray-400 mb-8">Start building with a free account. Upgrade to Pro for advanced analytics and team features.</p>
+              <h3 className="text-xl font-semibold mb-4">
+                Ready to optimize your learning?
+              </h3>
+              <p className="text-gray-400 mb-8">
+                Start building with a free account. Upgrade to Pro for advanced
+                analytics and team features.
+              </p>
 
               <div className="space-y-4">
                 <button className="w-full bg-white text-black px-6 py-3 rounded-md font-medium hover:bg-gray-100 transition-colors">
@@ -1238,30 +1612,40 @@ function Landing() {
             <div className="relative border border-white/20 p-8">
               {/* Corner plus signs */}
               <div className="absolute -top-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -top-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40"></div>
-                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40"></div>
+                <div className="absolute top-1/2 left-0 w-full h-px bg-white/40">
+                </div>
+                <div className="absolute left-1/2 top-0 w-px h-full bg-white/40">
+                </div>
               </div>
 
               <h3 className="text-xl font-semibold mb-4">Explore Memora Pro</h3>
-              <p className="text-gray-400 mb-8">with enhanced analytics, team collaboration, and priority support for serious learners.</p>
+              <p className="text-gray-400 mb-8">
+                with enhanced analytics, team collaboration, and priority
+                support for serious learners.
+              </p>
 
               <button className="border border-white/20 text-white px-6 py-3 rounded-md font-medium hover:bg-white/5 transition-colors">
                 Explore Pro Features
               </button>
             </div>
-
           </div>
         </div>
       </div>
@@ -1276,49 +1660,130 @@ function Landing() {
                 <span className="font-semibold">Memora</span>
               </div>
               <p className="text-gray-400 text-sm">
-                Intelligent spaced repetition for optimized learning and memory retention.
+                Intelligent spaced repetition for optimized learning and memory
+                retention.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Product</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <a href="#" className="block hover:text-white transition-colors">Features</a>
-                <a href="#" className="block hover:text-white transition-colors">Pricing</a>
-                <a href="#" className="block hover:text-white transition-colors">Enterprise</a>
-                <a href="#" className="block hover:text-white transition-colors">API</a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Features
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Pricing
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Enterprise
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  API
+                </a>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Resources</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <a href="#" className="block hover:text-white transition-colors">Docs</a>
-                <a href="#" className="block hover:text-white transition-colors">Guides</a>
-                <a href="#" className="block hover:text-white transition-colors">Blog</a>
-                <a href="#" className="block hover:text-white transition-colors">Community</a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Docs
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Guides
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Blog
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Community
+                </a>
               </div>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Company</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <a href="#" className="block hover:text-white transition-colors">About</a>
-                <a href="#" className="block hover:text-white transition-colors">Contact</a>
-                <a href="#" className="block hover:text-white transition-colors">Privacy</a>
-                <a href="#" className="block hover:text-white transition-colors">Terms</a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  About
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Contact
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Privacy
+                </a>
+                <a
+                  href="#"
+                  className="block hover:text-white transition-colors"
+                >
+                  Terms
+                </a>
               </div>
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2025 Memora. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">
+              © 2025 Memora. All rights reserved.
+            </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 <span className="sr-only">GitHub</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 <span className="sr-only">Twitter</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
                 </svg>
               </a>

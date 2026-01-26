@@ -1,19 +1,19 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { TimerProvider } from './contexts/TimerContext';
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp'
-import Dashboard from './pages/Dashboard'
-import Topics from './pages/Topics';
-import DocTags from './pages/DocTags';
-import Journal from './pages/Journal';
-import Chronicle from './pages/Chronicle';
-import Analytics from './pages/Analytics';
-import MemScoreEvaluation from './pages/MemScoreEvaluation';
-import FocusMode from './pages/FocusMode';
-import Profile from './pages/Profile';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { TimerProvider } from "./contexts/TimerContext";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Dashboard from "./pages/Dashboard";
+import Topics from "./pages/Topics";
+import DocTags from "./pages/DocTags";
+import Journal from "./pages/Journal";
+import Chronicle from "./pages/Chronicle";
+import Analytics from "./pages/Analytics";
+import MemScoreEvaluation from "./pages/MemScoreEvaluation";
+import FocusMode from "./pages/FocusMode";
+import Profile from "./pages/Profile";
 
 function App() {
   return (

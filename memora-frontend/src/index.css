@@ -2,12 +2,12 @@
 
 /* Hide all scrollbars globally but keep scrolling functionality */
 * {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 
 *::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 html, body {
@@ -16,11 +16,11 @@ html, body {
 
 /* Specific class for elements that need scrollbar hiding */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 /* Journal content styling */
@@ -29,7 +29,8 @@ html, body {
 }
 
 .journal-content h2 {
-  @apply text-xl font-semibold text-white mb-4 mt-8 border-b border-white/10 pb-2;
+  @apply text-xl font-semibold text-white mb-4 mt-8 border-b border-white/10
+    pb-2;
 }
 
 .journal-content h3 {

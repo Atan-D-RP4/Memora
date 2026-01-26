@@ -1,12 +1,14 @@
 # FRONTEND SOURCE - React Application
 
-**Scope**: Frontend source directory `memora-frontend/src`
-**Generated**: 2025-01-21
+**Scope**: Frontend source directory `memora-frontend/src` **Generated**:
+2025-01-21
 
 ## Overview
+
 Main React application source with routing, components, and utilities.
 
 ## Structure
+
 ```
 memora-frontend/src/
 ├── components/          # React components (see components/AGENTS.md)
@@ -21,16 +23,18 @@ memora-frontend/src/
 ```
 
 ## Where To Look
-| Task | Location | Notes |
-|------|----------|-------|
-| Route definitions | routes/ | Express.js style routing setup |
-| Page components | pages/ | Route-specific page implementations |
-| Custom hooks | hooks/ | Reusable React hook logic |
-| API calls | services/ | Backend communication layer |
-| State management | contexts/ | React context providers |
-| Routing setup | main.jsx | App initialization and router |
+
+| Task              | Location  | Notes                               |
+| ----------------- | --------- | ----------------------------------- |
+| Route definitions | routes/   | Express.js style routing setup      |
+| Page components   | pages/    | Route-specific page implementations |
+| Custom hooks      | hooks/    | Reusable React hook logic           |
+| API calls         | services/ | Backend communication layer         |
+| State management  | contexts/ | React context providers             |
+| Routing setup     | main.jsx  | App initialization and router       |
 
 ## Conventions
+
 - React Router v6 for navigation
 - File-based routing structure
 - Separation of concerns (pages vs components)
@@ -38,10 +42,12 @@ memora-frontend/src/
 - Context for global state
 
 ## Anti-Patterns (This Project)
+
 - **Mixed routing styles**: Some routing logic scattered across components
 - **Service inconsistency**: API calls sometimes in components directly
 
 ## Notes
+
 - Main.jsx is the application entry point with router setup
 - Components directory has its own AGENTS.md for detailed component guidance
 - Pages directory contains route-level components that compose components/

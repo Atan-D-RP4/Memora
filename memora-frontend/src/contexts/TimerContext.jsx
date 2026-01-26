@@ -1,18 +1,18 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 
 const TimerContext = createContext();
 
 // Timer actions
 const TIMER_ACTIONS = {
-  START_TIMER: 'START_TIMER',
-  PAUSE_TIMER: 'PAUSE_TIMER',
-  STOP_TIMER: 'STOP_TIMER',
-  COMPLETE_TIMER: 'COMPLETE_TIMER',
-  TICK: 'TICK',
-  SET_INITIAL_TIME: 'SET_INITIAL_TIME',
-  SET_TIMER_MODE: 'SET_TIMER_MODE',
-  SET_STUDY_METHOD: 'SET_STUDY_METHOD',
-  COMPLETE_SESSION: 'COMPLETE_SESSION'
+  START_TIMER: "START_TIMER",
+  PAUSE_TIMER: "PAUSE_TIMER",
+  STOP_TIMER: "STOP_TIMER",
+  COMPLETE_TIMER: "COMPLETE_TIMER",
+  TICK: "TICK",
+  SET_INITIAL_TIME: "SET_INITIAL_TIME",
+  SET_TIMER_MODE: "SET_TIMER_MODE",
+  SET_STUDY_METHOD: "SET_STUDY_METHOD",
+  COMPLETE_SESSION: "COMPLETE_SESSION",
 };
 
 // Initial state
@@ -20,14 +20,14 @@ const initialState = {
   isRunning: false,
   isPaused: false,
   isCompleted: false,
-  timerMode: 'countdown', // 'countdown' or 'stopwatch'
-  studyMethod: 'pomodoro', // 'pomodoro' or 'continuous'
+  timerMode: "countdown", // 'countdown' or 'stopwatch'
+  studyMethod: "pomodoro", // 'pomodoro' or 'continuous'
   timeLeft: 25 * 60, // for countdown mode
   elapsedTime: 0, // for stopwatch mode
   initialTime: 25 * 60,
   currentSession: 1,
   totalSessions: 4,
-  sessionHistory: []
+  sessionHistory: [],
 };
 
 // Timer reducer
@@ -37,14 +37,14 @@ const timerReducer = (state, action) => {
       return {
         ...state,
         isRunning: true,
-        isPaused: false
+        isPaused: false,
       };
 
     case TIMER_ACTIONS.PAUSE_TIMER:
       return {
         ...state,
         isRunning: false,
-        isPaused: true
+        isPaused: true,
       };
 
     case TIMER_ACTIONS.STOP_TIMER:
@@ -55,7 +55,7 @@ const timerReducer = (state, action) => {
         isCompleted: false,
         timeLeft: state.initialTime,
         elapsedTime: 0,
-        currentSession: 1
+        currentSession: 1,
       };
 
     case TIMER_ACTIONS.COMPLETE_TIMER:
@@ -63,20 +63,20 @@ const timerReducer = (state, action) => {
         ...state,
         isRunning: false,
         isPaused: false,
-        isCompleted: true
+        isCompleted: true,
       };
 
     case TIMER_ACTIONS.TICK:
-      if (state.timerMode === 'countdown') {
+      if (state.timerMode === "countdown") {
         const newTimeLeft = Math.max(0, state.timeLeft - 1);
         return {
           ...state,
-          timeLeft: newTimeLeft
+          timeLeft: newTimeLeft,
         };
       } else {
         return {
           ...state,
-          elapsedTime: state.elapsedTime + 1
+          elapsedTime: state.elapsedTime + 1,
         };
       }
 
@@ -84,21 +84,21 @@ const timerReducer = (state, action) => {
       return {
         ...state,
         initialTime: action.payload,
-        timeLeft: action.payload
+        timeLeft: action.payload,
       };
 
     case TIMER_ACTIONS.SET_TIMER_MODE:
       return {
         ...state,
         timerMode: action.payload,
-        timeLeft: action.payload === 'countdown' ? state.initialTime : 0,
-        elapsedTime: action.payload === 'stopwatch' ? 0 : state.elapsedTime
+        timeLeft: action.payload === "countdown" ? state.initialTime : 0,
+        elapsedTime: action.payload === "stopwatch" ? 0 : state.elapsedTime,
       };
 
     case TIMER_ACTIONS.SET_STUDY_METHOD:
       return {
         ...state,
-        studyMethod: action.payload
+        studyMethod: action.payload,
       };
 
     case TIMER_ACTIONS.COMPLETE_SESSION:
@@ -108,11 +108,13 @@ const timerReducer = (state, action) => {
         sessionHistory: [
           ...state.sessionHistory,
           {
-            duration: state.timerMode === 'countdown' ? state.initialTime : state.elapsedTime,
+            duration: state.timerMode === "countdown"
+              ? state.initialTime
+              : state.elapsedTime,
             completedAt: new Date().toISOString(),
-            method: state.studyMethod
-          }
-        ]
+            method: state.studyMethod,
+          },
+        ],
       };
 
     default:
@@ -143,7 +145,9 @@ export const TimerProvider = ({ children }) => {
 
   // Check for session completion
   useEffect(() => {
-    if (state.timerMode === 'countdown' && state.timeLeft === 0 && state.isRunning) {
+    if (
+      state.timerMode === "countdown" && state.timeLeft === 0 && state.isRunning
+    ) {
       dispatch({ type: TIMER_ACTIONS.COMPLETE_TIMER });
       dispatch({ type: TIMER_ACTIONS.COMPLETE_SESSION });
 
@@ -155,27 +159,43 @@ export const TimerProvider = ({ children }) => {
         completed: true,
         date: new Date().toISOString(),
         timerMode: state.timerMode,
-        studyMethod: state.studyMethod
+        studyMethod: state.studyMethod,
       };
 
       try {
-        const existingSessions = JSON.parse(localStorage.getItem('focus_sessions_harsith') || '[]');
+        const existingSessions = JSON.parse(
+          localStorage.getItem("focus_sessions_harsith") || "[]",
+        );
         const updatedSessions = [sessionData, ...existingSessions.slice(0, 19)]; // Keep last 20
-        localStorage.setItem('focus_sessions_harsith', JSON.stringify(updatedSessions));
-        console.log('Session saved to localStorage:', sessionData);
+        localStorage.setItem(
+          "focus_sessions_harsith",
+          JSON.stringify(updatedSessions),
+        );
+        console.log("Session saved to localStorage:", sessionData);
       } catch (error) {
-        console.warn('Failed to save session:', error);
+        console.warn("Failed to save session:", error);
       }
 
       // Auto-start next session for Pomodoro
-      if (state.studyMethod === 'pomodoro' && state.currentSession < state.totalSessions) {
+      if (
+        state.studyMethod === "pomodoro" &&
+        state.currentSession < state.totalSessions
+      ) {
         setTimeout(() => {
           dispatch({ type: TIMER_ACTIONS.SET_INITIAL_TIME, payload: 25 * 60 });
           // Don't auto-start, let user manually start next session
         }, 1000);
       }
     }
-  }, [state.timeLeft, state.isRunning, state.timerMode, state.studyMethod, state.currentSession, state.totalSessions, state.initialTime]);
+  }, [
+    state.timeLeft,
+    state.isRunning,
+    state.timerMode,
+    state.studyMethod,
+    state.currentSession,
+    state.totalSessions,
+    state.initialTime,
+  ]);
 
   // Timer control functions
   const startTimer = () => {
@@ -214,12 +234,14 @@ export const TimerProvider = ({ children }) => {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${
+      secs.toString().padStart(2, "0")
+    }`;
   };
 
   // Get current display time
   const getCurrentTime = () => {
-    return state.timerMode === 'countdown' ? state.timeLeft : state.elapsedTime;
+    return state.timerMode === "countdown" ? state.timeLeft : state.elapsedTime;
   };
 
   const value = {
@@ -234,7 +256,7 @@ export const TimerProvider = ({ children }) => {
     setInitialTime,
     formatTime,
     getCurrentTime,
-    dispatch
+    dispatch,
   };
 
   return (
@@ -248,7 +270,7 @@ export const TimerProvider = ({ children }) => {
 export const useTimer = () => {
   const context = useContext(TimerContext);
   if (!context) {
-    throw new Error('useTimer must be used within a TimerProvider');
+    throw new Error("useTimer must be used within a TimerProvider");
   }
   return context;
 };

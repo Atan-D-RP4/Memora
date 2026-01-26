@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 
 const MemScoreChart = ({ data = [], currentScore = 0 }) => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
@@ -15,9 +15,12 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
     // If we have a current score but no historical data, show just today's point
     const today = new Date();
     return [{
-      date: today.toISOString().split('T')[0],
+      date: today.toISOString().split("T")[0],
       score: currentScore, // Use the score as-is, no division needed
-      label: today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      label: today.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
     }];
   }, [data, currentScore]);
 
@@ -29,19 +32,19 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
   const chartHeight = height - padding * 2;
 
   // Calculate scales (now working with 0-10 scale)
-  const maxScore = Math.max(...chartData.map(d => d.score), 10);
-  const minScore = Math.min(...chartData.map(d => d.score), 0);
+  const maxScore = Math.max(...chartData.map((d) => d.score), 10);
+  const minScore = Math.min(...chartData.map((d) => d.score), 0);
   const scoreRange = maxScore - minScore || 1;
 
   // Generate path for the line
   const pathData = chartData.map((point, index) => {
     const x = padding + (index / (chartData.length - 1)) * chartWidth;
     const y = padding + ((maxScore - point.score) / scoreRange) * chartHeight;
-    return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-  }).join(' ');
+    return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+  }).join(" ");
 
   // Generate gradient path for area under curve
-  const areaPath = pathData + 
+  const areaPath = pathData +
     ` L ${padding + chartWidth} ${padding + chartHeight}` +
     ` L ${padding} ${padding + chartHeight} Z`;
 
@@ -49,7 +52,9 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
   const firstScore = chartData[0]?.score || 0;
   const lastScore = chartData[chartData.length - 1]?.score || 0;
   const trend = lastScore - firstScore;
-  const trendPercentage = firstScore > 0 ? ((trend / firstScore) * 100).toFixed(1) : 0;
+  const trendPercentage = firstScore > 0
+    ? ((trend / firstScore) * 100).toFixed(1)
+    : 0;
 
   const getTrendIcon = () => {
     if (trend > 0) return <TrendingUp className="w-4 h-4 text-green-400" />;
@@ -58,20 +63,24 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
   };
 
   const getTrendColor = () => {
-    if (trend > 0) return 'text-green-400';
-    if (trend < 0) return 'text-red-400';
-    return 'text-gray-400';
+    if (trend > 0) return "text-green-400";
+    if (trend < 0) return "text-red-400";
+    return "text-gray-400";
   };
 
   // Don't render if no data
   if (chartData.length === 0) {
     return (
       <div className="bg-black border border-white/20 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">MemScore Trend</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">
+          MemScore Trend
+        </h3>
         <div className="h-32 bg-gray-900/50 rounded-lg flex items-center justify-center border border-white/10">
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-2">No data yet</p>
-            <p className="text-gray-500 text-xs">Complete your evaluation or study sessions to see your progress</p>
+            <p className="text-gray-500 text-xs">
+              Complete your evaluation or study sessions to see your progress
+            </p>
           </div>
         </div>
       </div>
@@ -86,7 +95,9 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
           <div className="flex items-center space-x-2">
             {getTrendIcon()}
             <span className={`text-sm font-medium ${getTrendColor()}`}>
-              {trend > 0 ? '+' : ''}{trend} ({trend > 0 ? '+' : ''}{trendPercentage}%)
+              {trend > 0 ? "+" : ""}
+              {trend} ({trend > 0 ? "+" : ""}
+              {trendPercentage}%)
             </span>
           </div>
         )}
@@ -96,14 +107,20 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
         <svg width={width} height={height} className="overflow-visible">
           {/* Grid lines */}
           <defs>
-            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient
+              id="scoreGradient"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
               <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.05" />
             </linearGradient>
           </defs>
-          
+
           {/* Horizontal grid lines */}
-          {[0, 2.5, 5, 7.5, 10].map(score => {
+          {[0, 2.5, 5, 7.5, 10].map((score) => {
             const y = padding + ((maxScore - score) / scoreRange) * chartHeight;
             return (
               <line
@@ -137,8 +154,9 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
           {/* Data points */}
           {chartData.map((point, index) => {
             const x = padding + (index / (chartData.length - 1)) * chartWidth;
-            const y = padding + ((maxScore - point.score) / scoreRange) * chartHeight;
-            
+            const y = padding +
+              ((maxScore - point.score) / scoreRange) * chartHeight;
+
             return (
               <motion.circle
                 key={index}
@@ -164,9 +182,10 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
             animate={{ opacity: 1, scale: 1 }}
             className="absolute bg-gray-900 border border-white/20 rounded-lg p-2 pointer-events-none z-10"
             style={{
-              left: padding + (hoveredPoint / (chartData.length - 1)) * chartWidth - 30,
+              left: padding +
+                (hoveredPoint / (chartData.length - 1)) * chartWidth - 30,
               top: -10,
-              transform: 'translateY(-100%)'
+              transform: "translateY(-100%)",
             }}
           >
             <div className="text-xs text-white font-medium">
@@ -197,7 +216,7 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.2 }}
           >
-            {Math.max(...chartData.map(d => d.score)).toFixed(1)}
+            {Math.max(...chartData.map((d) => d.score)).toFixed(1)}
           </motion.div>
           <div className="text-xs text-gray-400">Peak</div>
         </div>
@@ -207,7 +226,8 @@ const MemScoreChart = ({ data = [], currentScore = 0 }) => {
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.2 }}
           >
-            {(chartData.reduce((sum, d) => sum + d.score, 0) / chartData.length).toFixed(1)}
+            {(chartData.reduce((sum, d) => sum + d.score, 0) / chartData.length)
+              .toFixed(1)}
           </motion.div>
           <div className="text-xs text-gray-400">Average</div>
         </div>

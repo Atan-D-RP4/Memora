@@ -1,26 +1,26 @@
-import React from 'react';
-import { X, AlertTriangle, Info, CheckCircle } from 'lucide-react';
+import React from "react";
+import { AlertTriangle, CheckCircle, Info, X } from "lucide-react";
 
-const Dialog = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title, 
-  message, 
-  type = 'info', // 'info', 'warning', 'success', 'confirm'
-  confirmText = 'OK',
-  cancelText = 'Cancel',
-  showCancel = false 
+const Dialog = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  type = "info", // 'info', 'warning', 'success', 'confirm'
+  confirmText = "OK",
+  cancelText = "Cancel",
+  showCancel = false,
 }) => {
   if (!isOpen) return null;
 
   const getIcon = () => {
     switch (type) {
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="w-6 h-6 text-red-400" />;
-      case 'success':
+      case "success":
         return <CheckCircle className="w-6 h-6 text-green-400" />;
-      case 'confirm':
+      case "confirm":
         return <AlertTriangle className="w-6 h-6 text-yellow-400" />;
       default:
         return <Info className="w-6 h-6 text-blue-400" />;
@@ -41,7 +41,7 @@ const Dialog = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
@@ -78,11 +78,11 @@ const Dialog = ({
           <button
             onClick={handleConfirm}
             className={`px-4 py-2 rounded-lg transition-colors ${
-              type === 'warning' || type === 'confirm'
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : type === 'success'
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+              type === "warning" || type === "confirm"
+                ? "bg-red-600 hover:bg-red-700 text-white"
+                : type === "success"
+                ? "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
           >
             {confirmText}
