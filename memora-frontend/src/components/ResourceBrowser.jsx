@@ -14,12 +14,14 @@ const ResourceBrowser = (
   );
 
   useEffect(() => {
+    let cancelled = false;
     if (isOpen) {
-      fetchDocTags();
+      fetchDocTags(cancelled, (v) => { cancelled = v; });
     }
+    return () => { cancelled = true; };
   }, [isOpen, currentPath, searchQuery]);
 
-  const fetchDocTags = async () => {
+  const fetchDocTags = async (cancelled, setCancelled) => {
     setLoading(true);
     try {
       const currentParentId = currentPath.length > 0
@@ -32,11 +34,17 @@ const ResourceBrowser = (
       };
 
       const response = await docTagsService.getDocTags(options);
-      setDocTags(response.docTags || []);
+      if (!cancelled) {
+        setDocTags(response.docTags || []);
+      }
     } catch (error) {
-      console.error("Failed to fetch DocTags:", error);
+      if (!cancelled) {
+        console.error("Failed to fetch DocTags:", error);
+      }
     } finally {
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     }
   };
 

@@ -1,9 +1,14 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET ||
-  "memora-super-secret-jwt-key-2025-development";
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ||
-  "memora-super-secret-refresh-key-2025-development";
+if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+  throw new Error(
+    "FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables. " +
+    "Refusing to start with insecure defaults."
+  );
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const JWT_EXPIRE = process.env.JWT_EXPIRE || "24h";
 const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || "7d";
 

@@ -181,12 +181,18 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = () => {
-    // This would typically show a confirmation dialog
-    console.log("Delete account requested");
     setToast({
       show: true,
       message: "Account deletion feature coming soon",
       type: "error",
+    });
+  };
+
+  const handleExportData = () => {
+    setToast({
+      show: true,
+      message: "Data export feature coming soon",
+      type: "info",
     });
   };
 
@@ -1012,9 +1018,9 @@ const Profile = () => {
                             Download all your study data, topics, and progress
                           </p>
                         </div>
-                        <button className="px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                          Export Data
-                        </button>
+                        <button onClick={handleExportData} className="px-4 py-2 border border-white/20 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                           Export Data
+                         </button>
                       </div>
                     </div>
                   </div>

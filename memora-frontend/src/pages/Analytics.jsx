@@ -283,9 +283,7 @@ const Analytics = () => {
   // Analytics calculation functions
   const calculateStudyStreak = () => {
     try {
-      // Get study streak from localStorage or calculate from session history
-      const streak = localStorage.getItem(`study_streak_${user?.id}`);
-      return streak ? parseInt(streak) || 0 : 0;
+      return user?.currentStreak || 0;
     } catch (error) {
       console.warn("Failed to calculate study streak:", error);
       return 0;
@@ -294,9 +292,9 @@ const Analytics = () => {
 
   const calculateTotalStudyTime = () => {
     try {
-      // Get total study time from focus mode sessions
+      const storageKey = user ? `focus_sessions_${user.id}` : "focus_sessions_guest";
       const sessions = JSON.parse(
-        localStorage.getItem(`focus_sessions_harsith`) || "[]",
+        localStorage.getItem(storageKey) || "[]",
       );
       if (!Array.isArray(sessions)) return 0;
       return sessions.reduce(
@@ -364,12 +362,10 @@ const Analytics = () => {
 
   const processStudyPatterns = () => {
     try {
-      // Generate study pattern data from localStorage sessions
+      const storageKey = user ? `focus_sessions_${user.id}` : "focus_sessions_guest";
       const sessions = JSON.parse(
-        localStorage.getItem(`focus_sessions_harsith`) || "[]",
+        localStorage.getItem(storageKey) || "[]",
       );
-      console.log("DEBUG: Found sessions in localStorage:", sessions);
-      console.log("DEBUG: Sessions length:", sessions.length);
 
       if (!Array.isArray(sessions)) {
         return {
@@ -380,7 +376,6 @@ const Analytics = () => {
       }
 
       const dailyActivity = generateDailyActivity(sessions);
-      console.log("DEBUG: Generated daily activity:", dailyActivity);
       const weeklyStats = generateWeeklyStats(sessions);
 
       return {

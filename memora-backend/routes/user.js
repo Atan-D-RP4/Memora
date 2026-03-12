@@ -429,6 +429,7 @@ router.post("/study-session", authenticateToken, async (req, res) => {
     }
 
     // Update user
+    const prevLongestStreak = user.longestStreak;
     user.currentStreak = newStreak;
     user.longestStreak = Math.max(user.longestStreak, newStreak);
     user.lastStudyDate = today;
@@ -442,7 +443,7 @@ router.post("/study-session", authenticateToken, async (req, res) => {
       currentStreak: user.currentStreak,
       longestStreak: user.longestStreak,
       totalStudyDays: user.totalStudyDays,
-      isNewRecord: newStreak > (user.longestStreak - newStreak),
+      isNewRecord: newStreak > prevLongestStreak,
     });
   } catch (error) {
     console.error("Record study session error:", error);

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Flame, Mail, Target, Trophy, User, X } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import apiService from "../services/api";
 
 const ProfileModal = ({ isOpen, onClose }) => {
   const { user, updateUser } = useAuth();
@@ -21,11 +22,11 @@ const ProfileModal = ({ isOpen, onClose }) => {
 
   const handleSave = async () => {
     try {
-      // Here you would typically call an API to update the user profile
-      // For now, we'll just update the local state
-      updateUser(editData);
+      const response = await apiService.updateUserProfile(editData);
+      if (response.success) {
+        updateUser({ ...user, ...editData });
+      }
       setIsEditing(false);
-      console.log("Profile updated:", editData);
     } catch (error) {
       console.error("Failed to update profile:", error);
     }

@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator");
 const Topic = require("../models/Topic");
 const DocTag = require("../models/DocTag");
 const { authenticateToken } = require("../middleware/auth");
+const log = require("../utils/logger")("topics");
 
 const router = express.Router();
 
@@ -199,11 +200,11 @@ router.post("/prevent-crowding", authenticateToken, async (req, res) => {
     const { targetDate } = req.body;
     const userId = req.user.id;
 
-    console.log("🔧 Prevent crowding request:", { targetDate, userId });
+    log.debug("prevent-crowding requested", { targetDate, userId }, userId);
 
     const result = await Topic.preventCrowding(userId, new Date(targetDate));
 
-    console.log("🔧 Prevent crowding result:", result);
+    log.debug("prevent-crowding completed", { result }, userId);
 
     res.json({
       success: true,
@@ -269,11 +270,6 @@ router.post(
   handleValidationErrors,
   async (req, res) => {
     try {
-      console.log(
-        "📝 Creating topic with request body:",
-        JSON.stringify(req.body, null, 2),
-      );
-
       const {
         title,
         content,
@@ -286,10 +282,8 @@ router.post(
       } = req.body;
       const userId = req.user.id;
 
-      console.log(
-        "📝 Extracted externalLinks:",
-        JSON.stringify(externalLinks, null, 2),
-      );
+      log.info("topic-create started", { userId, title, difficulty, category, tagCount: tags.length }, userId);
+      log.debug("topic-create payload", { externalLinks: externalLinks.length, attachments: attachments.length }, userId);
 
       const topic = new Topic({
         title,
@@ -305,14 +299,8 @@ router.post(
 
       await topic.save();
 
-      // TODO: Re-enable DocTag integration later
-      // For now, just store resources in the topic itself
-      console.log("Topic created with resources:", {
-        externalLinks: externalLinks.length,
-        attachments: attachments.length,
-      });
+      log.info("topic-created", { topicId: topic._id, title, userId, externalLinks: externalLinks.length, attachments: attachments.length }, userId);
 
-      // Check for crowding and redistribute if necessary
       const crowdingResult = await Topic.preventCrowding(
         userId,
         topic.nextReviewDate,
@@ -496,33 +484,23 @@ router.delete("/:id", authenticateToken, async (req, res) => {
  * @access  Private
  */
 router.post("/:id/review", [
-  // Temporarily disable authentication and validation for debugging
-  // authenticateToken,
-  // body('quality')
-  //   .isInt({ min: 0, max: 5 })
-  //   .withMessage('Quality must be between 0 and 5'),
-  // body('responseTime')
-  //   .optional()
-  //   .isInt({ min: 0 })
-  //   .withMessage('Response time must be a positive number')
-], /* handleValidationErrors, */ async (req, res) => {
+  authenticateToken,
+  body('quality')
+    .isInt({ min: 0, max: 5 })
+    .withMessage('Quality must be between 0 and 5'),
+  body('responseTime')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Response time must be a positive number')
+], handleValidationErrors, async (req, res) => {
   try {
-    console.log("🎯 Review endpoint called:", {
-      topicId: req.params.id,
-      body: req.body,
-      headers: req.headers,
-    });
-
     const { quality, responseTime = 0 } = req.body;
-    console.log("📊 Extracted data:", { quality, responseTime });
 
     const topic = await Topic.findOne({
       _id: req.params.id,
-      // userId: req.user.id, // Temporarily disabled for debugging
+      userId: req.user.id,
       isActive: true,
     });
-
-    console.log("📚 Found topic:", topic ? "Yes" : "No");
 
     if (!topic) {
       return res.status(404).json({
@@ -563,71 +541,18 @@ router.post("/:id/review", [
 });
 
 /**
- * @route   PUT /api/topics/:id
- * @desc    Update a topic
- * @access  Private (temporarily disabled)
- */
-router.put("/:id", /* authenticateToken, */ async (req, res) => {
-  try {
-    console.log("✏️ Edit endpoint called:", {
-      topicId: req.params.id,
-      body: req.body,
-    });
-
-    const { title, content, difficulty, learnedDate } = req.body;
-
-    const topic = await Topic.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        // userId: req.user.id, // Temporarily disabled
-        isActive: true,
-      },
-      {
-        title,
-        content,
-        difficulty,
-        ...(learnedDate && { learnedDate: new Date(learnedDate) }),
-        updatedAt: new Date(),
-      },
-      { new: true },
-    );
-
-    if (!topic) {
-      return res.status(404).json({
-        success: false,
-        message: "Topic not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Topic updated successfully",
-      topic,
-    });
-  } catch (error) {
-    console.error("Edit topic error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update topic",
-    });
-  }
-});
-
-/**
  * @route   POST /api/topics/:id/skip
  * @desc    Skip a topic for today (postpone by 1 day with collision avoidance)
  * @access  Private
  */
-router.post("/:id/skip", /* authenticateToken, */ async (req, res) => {
+router.post("/:id/skip", authenticateToken, async (req, res) => {
   try {
     const topicId = req.params.id;
-    // const userId = req.user.id; // Temporarily disabled
-
-    console.log("⏭️ Skip endpoint called:", { topicId });
+    const userId = req.user.id;
 
     const topic = await Topic.findOne({
       _id: topicId,
-      // userId, // Temporarily disabled
+      userId,
       isActive: true,
     });
 
@@ -659,7 +584,7 @@ router.post("/:id/skip", /* authenticateToken, */ async (req, res) => {
       endOfDay.setHours(23, 59, 59, 999);
 
       const topicsOnThisDay = await Topic.countDocuments({
-        // userId, // Temporarily disabled
+        userId,
         nextReviewDate: {
           $gte: startOfDay,
           $lte: endOfDay,
@@ -668,11 +593,8 @@ router.post("/:id/skip", /* authenticateToken, */ async (req, res) => {
         _id: { $ne: topicId }, // Exclude current topic
       });
 
-      console.log(
-        `📅 Checking ${candidateDate.toDateString()}: ${topicsOnThisDay} topics`,
-      );
+      log.debug("candidate-day checked", { date: candidateDate.toDateString(), topicsOnThisDay }, userId);
 
-      // Find day with least topics, but prefer tomorrow if it's not overcrowded
       if (dayOffset === 1 && topicsOnThisDay < maxTopicsPerDay) {
         bestDate = new Date(candidateDate);
         break;
@@ -689,11 +611,8 @@ router.post("/:id/skip", /* authenticateToken, */ async (req, res) => {
     topic.lastReviewed = new Date(); // Mark as interacted with
     await topic.save();
 
-    console.log(
-      `⏭️ Topic skipped: ${topic.title} -> ${newReviewDate.toDateString()}`,
-    );
+    log.info("topic-skipped", { topicId: topic._id, title: topic.title, newDate: newReviewDate }, userId);
 
-    // Format date as DD/MM/YYYY
     const formattedDate = newReviewDate.toLocaleDateString("en-GB");
 
     res.json({
@@ -725,7 +644,7 @@ router.post("/move-overdue", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    console.log("🔧 Moving overdue topics to today for user:", userId);
+    log.info("move-overdue started", { userId }, userId);
 
     const today = new Date();
     const startOfDay = new Date(
@@ -741,7 +660,7 @@ router.post("/move-overdue", authenticateToken, async (req, res) => {
       nextReviewDate: { $lt: startOfDay },
     });
 
-    console.log("🔧 Found overdue topics:", overdueTopics.length);
+    log.info("overdue-topics found", { count: overdueTopics.length }, userId);
 
     if (overdueTopics.length === 0) {
       return res.json({
@@ -764,7 +683,7 @@ router.post("/move-overdue", authenticateToken, async (req, res) => {
       },
     );
 
-    console.log("🔧 Moved overdue topics result:", result);
+    log.info("move-overdue completed", { moved: result.modifiedCount }, userId);
 
     res.json({
       success: true,

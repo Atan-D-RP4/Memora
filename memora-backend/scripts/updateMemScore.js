@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 const User = require("../models/User");
 
-// Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/memora");
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/memora");
 
 async function updateMemScore() {
   try {

@@ -78,7 +78,7 @@ src/
   username: String (unique, 3-30 chars, alphanumeric + underscore),
   email: String (unique, validated),
   password: String (bcrypt hashed, 12 salt rounds),
-  memScore: Number (0-100),
+  memScore: Number (0-10),
   hasCompletedEvaluation: Boolean,
   evaluationResults: {
     memoryGame: Number,
@@ -173,7 +173,7 @@ src/
 - **Scoring Formula**: `(correctAnswers / totalQuestions) × 10`
 
 ### 3.4 MemScore Calculation
-**Overall Score**: Average of all three test scores, displayed as integer (0-100)
+**Overall Score**: Average of all three test scores, displayed as integer (0-10)
 ```javascript
 overallScore = Math.round((memoryGameScore + tileRecallScore + processingSpeedScore) / 3)
 ```

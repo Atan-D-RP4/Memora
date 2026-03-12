@@ -74,27 +74,7 @@ const AddTopicModal = ({ isOpen, onClose, onSubmit, loading = false }) => {
     if (!validateForm()) return;
 
     try {
-      console.log("Submitting topic data:", formData);
-      console.log(
-        "Current localStorage token:",
-        localStorage.getItem("accessToken"),
-      );
-
-      // Test API connectivity first
-      try {
-        const healthResponse = await fetch("http://localhost:3001/api/health");
-        console.log("Health check response:", healthResponse.status);
-      } catch (healthError) {
-        console.error("Health check failed:", healthError);
-        setErrors({
-          submit:
-            "Cannot connect to server. Please check if the backend is running.",
-        });
-        return;
-      }
-
       await onSubmit(formData);
-      console.log("Topic created successfully");
 
       // Log activity to journal
       journalService.logTopicAdded(formData);

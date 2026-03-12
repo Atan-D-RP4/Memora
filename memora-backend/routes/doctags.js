@@ -6,6 +6,7 @@ const { body, validationResult } = require("express-validator");
 const DocTag = require("../models/DocTag");
 const Topic = require("../models/Topic");
 const { authenticateToken } = require("../middleware/auth");
+const log = require("../utils/logger")("doctags");
 
 const router = express.Router();
 
@@ -87,10 +88,8 @@ router.post("/cleanup-duplicates", authenticateToken, async (req, res) => {
         // Keep the first (oldest), delete the rest
         for (let i = 1; i < group.length; i++) {
           await DocTag.findByIdAndUpdate(group[i]._id, { isActive: false });
+          log.info("duplicate-doctag-removed", { name: group[i].name, id: group[i]._id }, userId);
           deletedCount++;
-          console.log(
-            `Deleted duplicate DocTag: ${group[i].name} (${group[i]._id})`,
-          );
         }
       }
     }
@@ -125,11 +124,11 @@ router.get("/health", (req, res) => {
 // Helper function to sync Topics to DocTags
 const syncTopicsToDocTags = async (userId) => {
   try {
-    console.log("Syncing Topics to DocTags for user:", userId);
+    log.debug("sync-topics-to-doctags started", { userId }, userId);
 
-    // Get all active topics for the user
     const topics = await Topic.find({ userId, isActive: true });
-    console.log("Found topics:", topics.length);
+
+    log.debug("topics-fetched", { count: topics.length }, userId);
 
     // Create a "Topics" folder if it doesn't exist
     let topicsFolder = await DocTag.findOne({
@@ -152,7 +151,7 @@ const syncTopicsToDocTags = async (userId) => {
         parentId: null,
       });
       await topicsFolder.save();
-      console.log("Created Topics folder");
+      log.info("topics-folder-created", { folderId: topicsFolder._id }, userId);
     }
 
     // Sync each topic that has attachments or external links
@@ -185,7 +184,7 @@ const syncTopicsToDocTags = async (userId) => {
           });
 
           await newDocTag.save();
-          console.log("Created DocTag for topic:", topic.title);
+          log.info("doctag-created", { topicTitle: topic.title, docTagId: newDocTag._id }, userId);
         } else {
           // Update existing DocTag with latest attachments/links
           existingDocTag.attachments = topic.attachments || [];
@@ -195,12 +194,13 @@ const syncTopicsToDocTags = async (userId) => {
             : "";
           existingDocTag.tags = topic.tags || [];
           await existingDocTag.save();
-          console.log("Updated DocTag for topic:", topic.title);
+          log.debug("doctag-updated", { topicTitle: topic.title }, userId);
         }
       }
     }
 
-    console.log("Topic sync completed");
+    log.debug("sync-topics-to-doctags completed", {}, userId);
+
   } catch (error) {
     console.error("Error syncing topics to DocTags:", error);
   }
@@ -281,16 +281,13 @@ router.post(
  */
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    console.log("DocTags GET request received");
-    console.log("Query params:", req.query);
-    console.log("User ID:", req.user?.id);
-
     const { parentId, type, category, search, limit = 50, page = 1 } =
       req.query;
     const userId = req.user.id;
 
-    // Auto-sync topics to DocTags before fetching (DISABLED to prevent duplicates)
-    // await syncTopicsToDocTags(userId);
+    log.debug("doctags-list requested", { userId, parentId, type, category, search, limit, page }, userId);
+
+    await syncTopicsToDocTags(userId);
 
     let query = { userId, isActive: true };
 
@@ -320,8 +317,7 @@ router.get("/", authenticateToken, async (req, res) => {
     const docTags = await docTagsQuery;
     const total = await DocTag.countDocuments(query);
 
-    console.log("DocTags found:", docTags.length);
-    console.log("Total count:", total);
+    log.debug("doctags-list returned", { count: docTags.length, total }, userId);
 
     res.json({
       success: true,

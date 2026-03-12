@@ -44,7 +44,7 @@ npm run dev:backend
 ```
 
 ## NOTES
-- Backend runs on port 3000, frontend dev server on 5173
+- Backend runs on port 3001, frontend dev server on 5173
 - Multer used for file uploads (deprecation warning on req.file)
 - No backend ESLint configuration present
 - Dashboard.jsx is complex with 20+ state variables and mixed concerns

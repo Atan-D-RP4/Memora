@@ -10,13 +10,14 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-// Rate limiting - Disabled for development
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // limit each IP to 100 requests per windowMs
-//   message: 'Too many requests from this IP, please try again later.'
-// });
-// app.use(limiter);
+if (process.env.NODE_ENV === "production") {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again later.",
+  });
+  app.use(limiter);
+}
 
 // CORS configuration - More permissive for development
 app.use(cors({
@@ -45,6 +46,10 @@ const connectDB = async () => {
     );
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("❌ MongoDB connection failed:", error.message);
+      process.exit(1);
+    }
     console.warn(
       "⚠️  MongoDB connection failed. Running in development mode without database.",
     );
@@ -62,14 +67,15 @@ app.get("/", (req, res) => {
   res.json({
     message: "Memora Backend API",
     status: "running",
-    endpoints: {
-      health: "/api/health",
-      auth: "/api/auth/*",
-      user: "/api/user/*",
-      topics: "/api/topics/*",
-      doctags: "/api/doctags/*",
-      journal: "/api/journal/*",
-    },
+      endpoints: {
+        health: "/api/health",
+        auth: "/api/auth/*",
+        user: "/api/user/*",
+        topics: "/api/topics/*",
+        doctags: "/api/doctags/*",
+        journal: "/api/journal/*",
+        logs: "/api/logs/*",
+      },
   });
 });
 
@@ -87,6 +93,7 @@ app.use("/api/user", require("./routes/user"));
 app.use("/api/topics", require("./routes/topics"));
 app.use("/api/doctags", require("./routes/doctags"));
 app.use("/api/journal", require("./routes/journal"));
+app.use("/api/logs", require("./routes/logs"));
 // app.use('/api/revisions', require('./routes/revisions'));
 // app.use('/api/neuro', require('./routes/neuro'));
 

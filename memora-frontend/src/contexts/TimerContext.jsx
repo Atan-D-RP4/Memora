@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useReducer } from "react";
+import { useAuth } from "./AuthContext";
 
 const TimerContext = createContext();
 
@@ -125,6 +126,7 @@ const timerReducer = (state, action) => {
 // Timer Provider Component
 export const TimerProvider = ({ children }) => {
   const [state, dispatch] = useReducer(timerReducer, initialState);
+  const { user } = useAuth();
 
   // Timer effect - runs every second when timer is active
   useEffect(() => {
@@ -163,12 +165,13 @@ export const TimerProvider = ({ children }) => {
       };
 
       try {
+        const storageKey = user ? `focus_sessions_${user.id}` : "focus_sessions_guest";
         const existingSessions = JSON.parse(
-          localStorage.getItem("focus_sessions_harsith") || "[]",
+          localStorage.getItem(storageKey) || "[]",
         );
         const updatedSessions = [sessionData, ...existingSessions.slice(0, 19)]; // Keep last 20
         localStorage.setItem(
-          "focus_sessions_harsith",
+          storageKey,
           JSON.stringify(updatedSessions),
         );
         console.log("Session saved to localStorage:", sessionData);

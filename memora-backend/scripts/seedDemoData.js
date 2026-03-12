@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-require("../../node_modules/dotenv").config();
+require("dotenv").config();
 
 const User = require("../models/User");
 const Topic = require("../models/Topic");

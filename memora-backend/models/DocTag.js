@@ -201,11 +201,26 @@ docTagSchema.index({ userId: 1, isFavorite: 1 });
 docTagSchema.index({ tags: 1 });
 docTagSchema.index({ name: "text", description: "text" });
 
-// Virtual for getting full path
+// Virtual returns name only; use getFullPath() instance method for the complete hierarchical path
 docTagSchema.virtual("fullPath").get(function () {
-  // This would need to be populated with parent data
   return this.name;
 });
+
+docTagSchema.methods.getFullPath = async function () {
+  const parts = [this.name];
+  let current = this;
+
+  while (current.parentId) {
+    const parent = await this.constructor.findById(current.parentId).select(
+      "name parentId",
+    );
+    if (!parent) break;
+    parts.unshift(parent.name);
+    current = parent;
+  }
+
+  return parts.join(" / ");
+};
 
 // Instance method to get all children (recursive)
 docTagSchema.methods.getAllChildren = async function () {

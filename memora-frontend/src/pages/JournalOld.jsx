@@ -28,6 +28,7 @@ import Toast from "../components/Toast";
 import Dialog from "../components/Dialog";
 import { useAuth } from "../contexts/AuthContext";
 import apiService from "../services/api";
+import journalService from "../services/journalService";
 
 // Simple markdown to HTML converter
 const parseMarkdown = (markdown) => {

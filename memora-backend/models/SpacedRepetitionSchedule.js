@@ -119,6 +119,7 @@ const spacedRepetitionScheduleSchema = new mongoose.Schema({
   rescheduleReason: {
     type: String,
     enum: [
+      null,
       "user_request",
       "load_balancing",
       "performance_optimization",

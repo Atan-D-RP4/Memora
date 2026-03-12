@@ -1,6 +1,6 @@
 class DocTagsService {
   constructor() {
-    this.baseURL = "/api/doctags";
+    this.baseURL = `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/doctags`;
   }
 
   // Get authorization headers

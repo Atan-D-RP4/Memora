@@ -9,7 +9,7 @@
   username: String (unique),
   email: String (unique),
   password: String (hashed with bcrypt),
-  memScore: Number (0-100),
+  memScore: Number (0-10),
   preferences: {
     colorTheme: String, // "monochrome", "neon-blue", "neon-green"
     defaultDifficulty: Number (1-5),
@@ -221,7 +221,7 @@ interface TopicCardProps {
 ### MemScoreBar Component
 ```typescript
 interface MemScoreBarProps {
-  score: number; // 0-100
+  score: number; // 0-10
   trend: 'up' | 'down' | 'stable';
   animated: boolean;
   showSparks: boolean;

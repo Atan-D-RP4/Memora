@@ -491,6 +491,24 @@ ${
     showToast("Journal refreshed!");
   };
 
+  // Remove stale activity entries older than 30 days from localStorage
+  const cleanupOldData = () => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const prefix = user ? `activities_${user.id}` : "activities_";
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        const datePart = key.split("_").pop();
+        if (datePart && new Date(datePart) < cutoff) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+  };
+
   // Load journal entry for current date
   const loadEntry = async (date) => {
     setLoading(true);
