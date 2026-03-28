@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Award,
@@ -16,12 +16,12 @@ import {
   Zap,
 } from "lucide-react";
 import Logo from "../components/Logo";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import journalService from "../services/journalService";
 
 const MemScoreEvaluation = () => {
   const navigate = useNavigate();
-  const { saveEvaluationResults, user } = useAuth();
+  const { saveEvaluationResults } = useAuth();
   const speedInputRef = useRef(null);
 
   const [currentPhase, setCurrentPhase] = useState("intro"); // intro, memory-game-instructions, memory-game, tile-recall-instructions, tile-recall, speed-test-instructions, speed-test, results

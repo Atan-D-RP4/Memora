@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
-import { useAuth } from "./AuthContext";
+import React, { createContext, useEffect, useReducer } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 const TimerContext = createContext();
 
@@ -267,15 +267,6 @@ export const TimerProvider = ({ children }) => {
       {children}
     </TimerContext.Provider>
   );
-};
-
-// Custom hook to use timer context
-export const useTimer = () => {
-  const context = useContext(TimerContext);
-  if (!context) {
-    throw new Error("useTimer must be used within a TimerProvider");
-  }
-  return context;
 };
 
 export default TimerContext;

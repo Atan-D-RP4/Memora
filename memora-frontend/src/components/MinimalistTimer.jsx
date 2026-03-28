@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useTimer } from "../contexts/TimerContext";
+import { useTimer } from "../hooks/useTimer";
 import { Clock, Pause, Play, Square, Timer } from "lucide-react";
 
 const MinimalistTimer = () => {

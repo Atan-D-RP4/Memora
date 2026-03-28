@@ -31,7 +31,7 @@ import {
   Video,
   Zap,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
 import Toast from "../components/Toast";
 import AddDocTagModal from "../components/AddDocTagModal";
@@ -162,12 +162,6 @@ const DocTags = () => {
   };
 
   // Toggle sidebar
-  const toggleSidebar = () => {
-    const newCollapsed = !sidebarCollapsed;
-    setSidebarCollapsed(newCollapsed);
-    localStorage.setItem("sidebarCollapsed", JSON.stringify(newCollapsed));
-  };
-
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
@@ -252,10 +246,6 @@ const DocTags = () => {
     setCurrentPath([...currentPath, { id: folder._id, name: folder.name }]);
   };
 
-  const handleNavigateUp = () => {
-    setCurrentPath(currentPath.slice(0, -1));
-  };
-
   const handleNavigateToRoot = () => {
     setCurrentPath([]);
   };
@@ -333,14 +323,6 @@ const DocTags = () => {
       gray: "text-gray-400",
     };
     return colorMap[color] || "text-blue-400";
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const handleCreate = async (formData) => {

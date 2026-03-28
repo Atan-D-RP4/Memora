@@ -58,10 +58,16 @@ memora-frontend/src/
 # Development server
 bun run dev
 
-# Lint and build
+# Lint, tests, and build
 bun run lint
+bun run test
 bun run build
 
 # Preview production build
 bun run preview
 ```
+
+## Deployment Notes
+
+- Frontend service layer defaults to `"/api"` in production (`VITE_API_URL` can override).
+- Root `vercel.json` handles API routing to backend serverless entrypoint and SPA fallback to `index.html`.

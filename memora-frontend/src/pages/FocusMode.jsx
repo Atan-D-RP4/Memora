@@ -13,8 +13,8 @@ import {
   Settings,
   Square,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { useTimer } from "../contexts/TimerContext";
+import { useAuth } from "../hooks/useAuth";
+import { useTimer } from "../hooks/useTimer";
 import Toast from "../components/Toast";
 import apiService from "../services/api";
 import journalService from "../services/journalService";

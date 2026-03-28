@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Eye, Globe, Timer, TrendingUp } from "lucide-react";
 
 const DailyUsageTracker = () => {
   const [hoveredDay, setHoveredDay] = useState(null);
-  const [websiteUsage, setWebsiteUsage] = useState([]);
 
   // Track website usage time
   useEffect(() => {

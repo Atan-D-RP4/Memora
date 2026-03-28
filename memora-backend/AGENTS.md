@@ -67,6 +67,12 @@ bun run dev
 # Production start
 bun run start
 
-# Test script (currently placeholder in package.json)
+# Run backend tests
 bun run test
 ```
+
+## DEPLOYMENT (VERCEL)
+
+- `memora-backend/api/index.js` exports the Express app for Vercel serverless runtime.
+- `memora-backend/app.js` contains shared app wiring used by both local server and serverless entrypoint.
+- Set `JWT_SECRET`, `JWT_REFRESH_SECRET`, and `MONGODB_URI` in Vercel environment settings.

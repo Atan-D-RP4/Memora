@@ -30,7 +30,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
 import Toast from "../components/Toast";
 import Dialog from "../components/Dialog";
@@ -52,7 +52,7 @@ const Chronicle = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDayDetails, setShowDayDetails] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -591,7 +591,6 @@ const Chronicle = () => {
     const month = currentDate.getMonth();
 
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
 

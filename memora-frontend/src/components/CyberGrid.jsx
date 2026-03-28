@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 
 const CyberGrid = ({ className = "" }) => {
   const gridRef = useRef(null);

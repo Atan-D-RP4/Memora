@@ -9,12 +9,12 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Logo from "../components/Logo";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 function Login() {
   const navigate = useNavigate();
-  const { login, isLoading: authLoading, error: authError, clearError } =
-    useAuth();
+  const { login, clearError } = useAuth();
+  const _motionRef = motion;
 
   const [formData, setFormData] = useState({
     email: "",

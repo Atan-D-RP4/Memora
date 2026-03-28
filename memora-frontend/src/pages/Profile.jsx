@@ -29,12 +29,12 @@ import {
   Trophy,
   User,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Toast from "../components/Toast";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // State management
   const [activeTab, setActiveTab] = useState("general");

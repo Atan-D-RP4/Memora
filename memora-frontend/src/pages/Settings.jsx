@@ -13,7 +13,7 @@ import {
   Sliders,
   Zap,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Toast from "../components/Toast";
 import apiService from "../services/api";
 
@@ -100,20 +100,21 @@ const Settings = () => {
 
       <div className="flex flex-1 overflow-hidden">
         <nav className="w-48 border-r border-white/10 p-4 flex flex-col gap-1 shrink-0">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
+          {TABS.map((tab) => {
+            const TabIcon = tab.icon;
+            return <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-3 px-3 py-2 text-left text-sm font-mono transition-colors ${
-                activeTab === id
+                activeTab === tab.id
                   ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
                   : "text-gray-400 hover:text-white hover:bg-white/5"
               }`}
             >
-              <Icon size={14} />
-              {label}
+              <TabIcon size={14} />
+              {tab.label}
             </button>
-          ))}
+          })}
         </nav>
 
         <main className="flex-1 p-8 overflow-y-auto">

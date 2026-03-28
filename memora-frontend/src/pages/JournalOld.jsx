@@ -14,6 +14,7 @@ import {
   Edit3,
   Eye,
   FileText,
+  Download,
   PanelLeft,
   PanelLeftClose,
   Plus,
@@ -26,8 +27,7 @@ import {
 import Logo from "../components/Logo";
 import Toast from "../components/Toast";
 import Dialog from "../components/Dialog";
-import { useAuth } from "../contexts/AuthContext";
-import apiService from "../services/api";
+import { useAuth } from "../hooks/useAuth";
 import journalService from "../services/journalService";
 
 // Simple markdown to HTML converter
@@ -55,7 +55,7 @@ const parseMarkdown = (markdown) => {
     )
     .replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>')
     // Lists
-    .replace(/^\- (.*$)/gim, '<li class="text-gray-300 mb-1">$1</li>')
+    .replace(/^- (.*$)/gim, '<li class="text-gray-300 mb-1">$1</li>')
     .replace(/^(\d+)\. (.*$)/gim, '<li class="text-gray-300 mb-1">$2</li>')
     // Code blocks
     .replace(

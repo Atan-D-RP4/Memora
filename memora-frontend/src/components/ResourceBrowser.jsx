@@ -21,7 +21,7 @@ const ResourceBrowser = (
     return () => { cancelled = true; };
   }, [isOpen, currentPath, searchQuery]);
 
-  const fetchDocTags = async (cancelled, setCancelled) => {
+  const fetchDocTags = async (cancelled) => {
     setLoading(true);
     try {
       const currentParentId = currentPath.length > 0
@@ -78,9 +78,7 @@ const ResourceBrowser = (
     setCurrentPath([...currentPath, { id: folder._id, name: folder.name }]);
   };
 
-  const navigateBack = () => {
-    setCurrentPath(currentPath.slice(0, -1));
-  };
+  const _navigateBack = () => { setCurrentPath(currentPath.slice(0, -1)); };
 
   if (!isOpen) return null;
 

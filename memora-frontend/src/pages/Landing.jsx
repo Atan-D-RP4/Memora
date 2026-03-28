@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   BarChart3,
@@ -9,18 +9,17 @@ import {
   Clock,
   FileText,
   Flag,
-  LogOut,
   Play,
   Smartphone,
   Target,
   Users,
   Zap,
 } from "lucide-react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import Logo from "../components/Logo";
 import logoImg from "../assets/logo.jpg";
 import UserProfileDropdown from "../components/UserProfileDropdown";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 // Floating Particles Component
 const FloatingParticles = () => {
@@ -100,17 +99,8 @@ const AnimatedSection = ({ children, className = "", delay = 0 }) => {
 };
 
 function Landing() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      // Stay on landing page after logout
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  const { user } = useAuth();
+  const _motionRef = motion;
 
   return (
     <div className="bg-black text-white min-h-screen">

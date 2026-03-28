@@ -30,7 +30,7 @@ import Toast from "../components/Toast";
 import Dialog from "../components/Dialog";
 import UserProfileDropdown from "../components/UserProfileDropdown";
 import MinimalistTimer from "../components/MinimalistTimer";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import apiService from "../services/api";
 
 // Clean markdown to HTML converter with proper spacing
@@ -68,7 +68,7 @@ const parseMarkdown = (markdown) => {
       '<a href="$2" class="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">$1</a>',
     )
     // Lists
-    .replace(/^\- (.*$)/gim, '<li class="text-gray-300 mb-1">• $1</li>')
+    .replace(/^- (.*$)/gim, '<li class="text-gray-300 mb-1">• $1</li>')
     .replace(/^\* (.*$)/gim, '<li class="text-gray-300 mb-1">• $1</li>')
     // Convert paragraphs (double newlines) and preserve single line breaks
     .split("\n\n")
@@ -722,9 +722,6 @@ ${
           topicsSummary += `**${day}**: ${topics.join(", ")}\n\n`;
 
           // Get detailed stats for each day
-          const dayKey = day.split(", ")[1]; // Extract "Aug 18" from "Mon, Aug 18"
-          const dayActivities = [];
-
           // Find the corresponding day's activities
           for (let i = 0; i < 7; i++) {
             const checkDay = new Date(weekStart);

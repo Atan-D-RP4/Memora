@@ -3,7 +3,7 @@ class JournalService {
     this.activities = [];
     this.settings = this.loadSettings();
     this.currentUserId = null;
-    this.apiBase = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    this.apiBase = import.meta.env.VITE_API_URL || "/api";
   }
 
   getAuthHeaders() {
@@ -175,7 +175,8 @@ class JournalService {
     this.addActivity(activity);
   }
 
-  logStudyStreak(currentStreak, isNewRecord = false) {
+  logStudyStreak(_currentStreak, _isNewRecord = false) {
+    void _isNewRecord;
     return;
   }
 
@@ -299,7 +300,11 @@ class JournalService {
       }),
     );
 
-    this._syncJournalToBackend(today, journalEntry, activities).catch(() => {});
+    this._syncJournalToBackend(today, journalEntry, activities).catch((error) => {
+      this._log("warn", "journal-sync-failed", {
+        error: error?.message || "Unknown sync error",
+      });
+    });
   }
 
   async _syncJournalToBackend(date, content, activities) {
@@ -310,7 +315,10 @@ class JournalService {
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ date, content, activities }),
       });
-    } catch {
+    } catch (error) {
+      this._log("warn", "journal-backend-sync-exception", {
+        error: error?.message || "Unknown backend sync error",
+      });
     }
   }
 

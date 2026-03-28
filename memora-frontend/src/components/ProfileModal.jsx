@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Calendar, Flame, Mail, Target, Trophy, User, X } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import apiService from "../services/api";
 
 const ProfileModal = ({ isOpen, onClose }) => {

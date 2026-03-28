@@ -40,7 +40,7 @@ import Dialog from "../components/Dialog";
 import MinimalistTimer from "../components/MinimalistTimer";
 import UserProfileDropdown from "../components/UserProfileDropdown";
 import logoImg from "../assets/logo.jpg";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { useTopics } from "../hooks/useTopics";
 import apiService from "../services/api";
 import journalService from "../services/journalService";

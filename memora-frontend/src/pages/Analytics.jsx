@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   Activity,
   Award,
@@ -29,7 +28,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
 import Toast from "../components/Toast";
 import MemScoreChart from "../components/MemScoreChart";
@@ -209,7 +208,7 @@ const Analytics = () => {
       const dueToday = (dueTopicsResponse.success && dueTopicsResponse.topics)
         ? dueTopicsResponse.topics.length
         : 0;
-      const upcomingTopics =
+      const _upcomingTopics =
         (upcomingResponse.success && upcomingResponse.topics)
           ? upcomingResponse.topics
           : [];
@@ -436,7 +435,7 @@ const Analytics = () => {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return sessionDate >= weekAgo;
-      } catch (error) {
+      } catch {
         return false;
       }
     });
@@ -509,14 +508,6 @@ const Analytics = () => {
     return `${minutes}m`;
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   if (isLoading) {
     return (
@@ -869,7 +860,6 @@ const Analytics = () => {
                     <div className="space-y-4">
                       {analyticsData.topicPerformance.slice(0, 5).map((
                         topic,
-                        index,
                       ) => (
                         <div
                           key={topic.id}

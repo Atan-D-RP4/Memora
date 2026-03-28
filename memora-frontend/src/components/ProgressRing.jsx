@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 
 const ProgressRing = ({
   progress = 0,
