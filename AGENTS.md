@@ -12,8 +12,7 @@ Full-stack memory management app with React frontend and Express.js backend.
 /
 ├── memora-frontend/    # React + Vite + Tailwind SPA
 ├── memora-backend/     # Express.js API server
-├── shared/             # Shared utilities/types
-└── package.json        # Workspace configuration
+└── docs/               # Specs, review docs, planning artifacts
 ```
 
 ## WHERE TO LOOK
@@ -33,14 +32,17 @@ Full-stack memory management app with React frontend and Express.js backend.
 ## COMMANDS
 ```bash
 # Frontend development
-cd memora-frontend && npm run dev
+cd memora-frontend && bun run dev
 
 # Backend development  
-cd memora-backend && npm start
+cd memora-backend && bun run dev
 
-# Full stack (from root)
-npm run dev:frontend
-npm run dev:backend
+# Frontend quality checks
+cd memora-frontend && bun run lint
+cd memora-frontend && bun run build
+
+# Backend tests (placeholder script)
+cd memora-backend && bun run test
 ```
 
 ## NOTES

@@ -57,3 +57,16 @@ memora-backend/
 - Helmet.js security headers configured
 - CORS allows localhost:5173, devtunnels, and FRONTEND_URL
 - Multer deprecation warning: req.file deprecated, use req.files
+
+## COMMANDS
+
+```bash
+# Development server
+bun run dev
+
+# Production start
+bun run start
+
+# Test script (currently placeholder in package.json)
+bun run test
+```

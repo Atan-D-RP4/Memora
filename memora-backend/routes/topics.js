@@ -2,6 +2,7 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const Topic = require("../models/Topic");
 const DocTag = require("../models/DocTag");
+const RevisionHistory = require("../models/RevisionHistory");
 const { authenticateToken } = require("../middleware/auth");
 const log = require("../utils/logger")("topics");
 
@@ -485,20 +486,39 @@ router.delete("/:id", authenticateToken, async (req, res) => {
  */
 router.post("/:id/review", [
   authenticateToken,
-  body('quality')
+  body("quality")
     .isInt({ min: 0, max: 5 })
-    .withMessage('Quality must be between 0 and 5'),
-  body('responseTime')
+    .withMessage("Quality must be between 0 and 5"),
+  body("responseTime")
     .optional()
     .isInt({ min: 0 })
-    .withMessage('Response time must be a positive number')
+    .withMessage("Response time must be a positive number"),
+  body("studyDuration")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Study duration must be a positive number"),
+  body("reviewType")
+    .optional()
+    .isIn(["scheduled", "manual", "cramming"])
+    .withMessage("Invalid review type"),
+  body("studyMode")
+    .optional()
+    .isIn(["flashcard", "quiz", "free-recall", "recognition"])
+    .withMessage("Invalid study mode"),
 ], handleValidationErrors, async (req, res) => {
   try {
-    const { quality, responseTime = 0 } = req.body;
+    const {
+      quality,
+      responseTime = 0,
+      studyDuration = 0,
+      reviewType = "scheduled",
+      studyMode = "flashcard",
+    } = req.body;
+    const userId = req.user.id;
 
     const topic = await Topic.findOne({
       _id: req.params.id,
-      userId: req.user.id,
+      userId,
       isActive: true,
     });
 
@@ -509,8 +529,45 @@ router.post("/:id/review", [
       });
     }
 
+    // Capture SM-2 state before update for RevisionHistory
+    const intervalBefore = topic.interval;
+    const easeFactorBefore = topic.easeFactor;
+    const repetitionsBefore = topic.repetitions;
+
     // Update spaced repetition parameters
     await topic.updateSpacedRepetition(quality);
+
+    // Create RevisionHistory record
+    await RevisionHistory.create({
+      userId,
+      topicId: topic._id,
+      sessionId: `${topic._id}-${Date.now()}`,
+      quality,
+      responseTime,
+      difficulty: topic.difficulty,
+      wasCorrect: quality >= 3,
+      reviewType,
+      studyMode,
+      intervalBefore,
+      intervalAfter: topic.interval,
+      easeFactorBefore,
+      easeFactorAfter: topic.easeFactor,
+      repetitionsBefore,
+      repetitionsAfter: topic.repetitions,
+      studyDuration,
+    });
+
+    log.info("topic-reviewed", {
+      topicId: topic._id,
+      title: topic.title,
+      quality,
+      wasCorrect: quality >= 3,
+      responseTime,
+      studyDuration,
+      intervalBefore,
+      intervalAfter: topic.interval,
+      easeFactorAfter: topic.easeFactor,
+    }, userId);
 
     // Check for crowding and redistribute if necessary
     const crowdingResult = await Topic.preventCrowding(
@@ -532,7 +589,7 @@ router.post("/:id/review", [
       crowdingPrevention: crowdingResult,
     });
   } catch (error) {
-    console.error("Record review error:", error);
+    log.error("topic-review failed", { error: error.message }, req.user.id);
     res.status(500).json({
       success: false,
       message: "Failed to record review",

@@ -40,7 +40,6 @@ import Dialog from "../components/Dialog";
 import MinimalistTimer from "../components/MinimalistTimer";
 import UserProfileDropdown from "../components/UserProfileDropdown";
 import logoImg from "../assets/logo.jpg";
-import logoWhiteOutline from "../assets/logowhiteoutline.png";
 import { useAuth } from "../contexts/AuthContext";
 import { useTopics } from "../hooks/useTopics";
 import apiService from "../services/api";
@@ -157,6 +156,9 @@ const Dashboard = () => {
     message: "",
     type: "success",
   });
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem("sidebarCollapsed");
     return saved ? JSON.parse(saved) : false;
@@ -169,8 +171,9 @@ const Dashboard = () => {
   const [loadingUpcoming, setLoadingUpcoming] = useState(false);
   const [nextSevenDaysData, setNextSevenDaysData] = useState([]);
   const [processingTopics, setProcessingTopics] = useState(new Set());
-  const [workloadData, setWorkloadData] = useState([]);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  // Tracks when each topic was displayed, used to calculate responseTime on review
+  const [reviewStartTimes, setReviewStartTimes] = useState(new Map());
 
   // Dialog state
   const [dialog, setDialog] = useState({
@@ -189,15 +192,14 @@ const Dashboard = () => {
     try {
       const response = await apiService.verifyToken();
       if (response.success) {
-        console.log("Refreshed user data from backend:", response.user);
-        console.log("New memScore:", response.user.memScore);
+        journalService._log("debug", "user-data-refreshed", { memScore: response.user.memScore });
         // Update user with fresh data from backend
         updateUser({
           ...response.user,
         });
       }
     } catch (error) {
-      console.error("Failed to refresh user data:", error);
+      journalService._log("error", "user-data-refresh failed", { error: error.message });
     }
   };
 
@@ -214,12 +216,18 @@ const Dashboard = () => {
     try {
       const response = await apiService.getDueTopics(10);
       if (response.success) {
+        const now = Date.now();
         setDueTopics(response.topics);
+        setReviewStartTimes((prev) => {
+          const next = new Map(prev);
+          response.topics.forEach((t) => next.set(t._id, now));
+          return next;
+        });
         // Store the due topics for later calculation
         return response.topics;
       }
     } catch (error) {
-      console.error("Failed to fetch due topics:", error);
+      journalService._log("error", "fetch-due-topics failed", { error: error.message });
       return [];
     } finally {
       setLoadingDue(false);
@@ -232,11 +240,19 @@ const Dashboard = () => {
     try {
       const response = await apiService.getUpcomingTopics(365, 100); // Get all topics for next year
       if (response.success) {
+        const now = Date.now();
         setUpcomingTopics(response.topics);
+        setReviewStartTimes((prev) => {
+          const next = new Map(prev);
+          response.topics.forEach((t) => {
+            if (!next.has(t._id)) next.set(t._id, now);
+          });
+          return next;
+        });
         return response.topics;
       }
     } catch (error) {
-      console.error("Failed to fetch upcoming topics:", error);
+      journalService._log("error", "fetch-upcoming-topics failed", { error: error.message });
       return [];
     } finally {
       setLoadingUpcoming(false);
@@ -248,11 +264,10 @@ const Dashboard = () => {
     try {
       const response = await apiService.getWorkload(14);
       if (response.success) {
-        setWorkloadData(response.workload);
         return response.workload;
       }
     } catch (error) {
-      console.error("Failed to fetch workload data:", error);
+      journalService._log("error", "fetch-workload failed", { error: error.message });
       return [];
     }
   };
@@ -270,17 +285,16 @@ const Dashboard = () => {
       // No deduplication needed - backend queries are now separate
       const allTopics = [...dueTopicsData, ...upcomingTopicsData];
 
-      console.log("Due topics (today + overdue):", dueTopicsData.length);
-      console.log(
-        "Upcoming topics (tomorrow onwards):",
-        upcomingTopicsData.length,
-      );
-      console.log("Total topics for 7-day calculation:", allTopics.length);
+      journalService._log("debug", "topics-loaded", {
+        dueCount: dueTopicsData.length,
+        upcomingCount: upcomingTopicsData.length,
+        total: allTopics.length,
+      });
 
       // Calculate with combined data
       calculateNextSevenDays(allTopics, workloadData);
     } catch (error) {
-      console.error("Failed to fetch topics and calculate 7-day view:", error);
+      journalService._log("error", "fetch-topics-7day failed", { error: error.message });
     }
   };
 
@@ -289,16 +303,10 @@ const Dashboard = () => {
     const today = new Date();
     const next7Days = [];
 
-    console.log("Calculating Next 7 Days with topics:", topics.length);
-    console.log("Today is:", today.toDateString());
-    console.log(
-      "All topics for 7-day calculation:",
-      topics.map((t) => ({
-        title: t.title,
-        nextReviewDate: t.nextReviewDate,
-        dateStr: new Date(t.nextReviewDate).toISOString().split("T")[0],
-      })),
-    );
+    journalService._log("debug", "next-7-days-calculation-started", {
+      topicCount: topics.length,
+      today: today.toDateString(),
+    });
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
@@ -322,17 +330,13 @@ const Dashboard = () => {
         }
       });
 
-      console.log(
-        `Day ${i} (${dayName} ${dateStr}): ${topicsOnDay.length} topics`,
-      );
       if (topicsOnDay.length > 0) {
-        console.log(
-          "Topics on this day:",
-          topicsOnDay.map((t) => ({
-            title: t.title,
-            nextReviewDate: t.nextReviewDate,
-          })),
-        );
+        journalService._log("debug", "next-7-days-day-topics", {
+          dayOffset: i,
+          dayName,
+          date: dateStr,
+          topicCount: topicsOnDay.length,
+        });
       }
 
       // Check workload data for more accurate count and difficulty analysis
@@ -394,11 +398,15 @@ const Dashboard = () => {
   // Handle crowding prevention
   const handlePreventCrowding = async (targetDate) => {
     try {
-      console.log("🔧 Preventing crowding for date:", targetDate);
+      journalService._log("info", "prevent-crowding-clicked", { targetDate });
       showToast("Analyzing topic distribution...", "info");
 
       const response = await apiService.preventCrowding(targetDate);
-      console.log("🔧 Crowding prevention response:", response);
+      journalService._log("info", "prevent-crowding-result", {
+        targetDate,
+        redistributed: response.redistributed,
+        count: response.count,
+      });
 
       if (response.success && response.redistributed) {
         showToast(
@@ -411,7 +419,7 @@ const Dashboard = () => {
         showToast("No crowding detected or redistribution needed", "info");
       }
     } catch (error) {
-      console.error("Failed to prevent crowding:", error);
+      journalService._log("error", "prevent-crowding failed", { targetDate, error: error.message });
       showToast("Failed to redistribute topics", "error");
     }
   };
@@ -419,11 +427,11 @@ const Dashboard = () => {
   // Handle moving overdue topics to today
   const handleMoveOverdueTopics = async (silent = false) => {
     try {
-      console.log("🔧 Moving overdue topics to today");
+      journalService._log("info", "move-overdue-clicked", {}, user?.id);
       if (!silent) showToast("Moving overdue topics...", "info");
 
       const response = await apiService.moveOverdueTopics();
-      console.log("🔧 Move overdue response:", response);
+      journalService._log("info", "move-overdue-result", { moved: response.moved }, user?.id);
 
       if (response.success && response.moved > 0) {
         if (!silent) {
@@ -438,7 +446,7 @@ const Dashboard = () => {
         if (!silent) showToast("No overdue topics found", "info");
       }
     } catch (error) {
-      console.error("Failed to move overdue topics:", error);
+      journalService._log("error", "move-overdue failed", { error: error.message });
       if (!silent) showToast("Failed to move overdue topics", "error");
     }
   };
@@ -447,16 +455,25 @@ const Dashboard = () => {
   const handleTopicReview = async (topicId, quality = 3) => {
     if (processingTopics.has(topicId)) return; // Prevent double-clicks
 
-    console.log("🎯 Marking topic as done:", topicId, "with quality:", quality);
+    journalService._log("info", "topic-review-clicked", { topicId, quality });
     setProcessingTopics((prev) => new Set(prev).add(topicId));
 
+    // Calculate response time from when topic was displayed
+    const startTime = reviewStartTimes.get(topicId) || Date.now();
+    const responseTime = Date.now() - startTime;
+
     try {
-      console.log("📡 Making API call to review topic...");
-      const response = await apiService.reviewTopic(topicId, quality);
-      console.log("📊 Review Response:", response);
+      const response = await apiService.reviewTopic(
+        topicId,
+        quality,
+        responseTime,
+        0, // studyDuration
+        "scheduled",
+        "flashcard",
+      );
 
       if (response && response.success) {
-        console.log("✅ Topic marked as done successfully:", response);
+        journalService._log("info", "topic-review-success", { topicId, quality, responseTime });
 
         // Find the topic from current topics list
         const reviewedTopic = dueTopics.find((t) => t._id === topicId) ||
@@ -489,10 +506,7 @@ const Dashboard = () => {
           type: "success",
         });
       } else {
-        console.error(
-          "❌ Review failed:",
-          response?.message || "Unknown error",
-        );
+        journalService._log("error", "topic-review-api-failed", { topicId, message: response?.message });
         setToast({
           show: true,
           message: `❌ Failed to mark topic as done: ${
@@ -502,7 +516,7 @@ const Dashboard = () => {
         });
       }
     } catch (error) {
-      console.error("💥 Failed to review topic:", error);
+      journalService._log("error", "topic-review-exception", { topicId, error: error.message });
       setToast({
         show: true,
         message: `❌ Network error: ${error.message}. Please try again.`,
@@ -519,58 +533,34 @@ const Dashboard = () => {
 
   // Handle topic skip
   const handleTopicSkip = async (topicId) => {
-    if (processingTopics.has(topicId)) return; // Prevent double-clicks
+    if (processingTopics.has(topicId)) return;
 
-    console.log("⏭️ Skipping topic:", topicId);
+    journalService._log("info", "topic-skip-clicked", { topicId });
     setProcessingTopics((prev) => new Set(prev).add(topicId));
-
     try {
-      console.log("📡 Making API call to skip topic...");
       const response = await apiService.skipTopic(topicId);
-      console.log("📊 Skip Response:", response);
+      journalService._log("info", "topic-skip-result", { topicId, success: response.success });
 
       if (response && response.success) {
-        console.log("✅ Topic skipped successfully:", response);
-
-        // Find the topic from current topics list
         const skippedTopic = dueTopics.find((t) => t._id === topicId) ||
-          upcomingTopics.find((t) => t._id === topicId) ||
-          topics.find((t) => t._id === topicId);
-
-        // Log to journal
+          upcomingTopics.find((t) => t._id === topicId);
         if (skippedTopic) {
           journalService.logTopicSkipped(skippedTopic);
         }
-
         await fetchAllTopicsAndCalculate();
-
-        setToast({
-          show: true,
-          message: response.message || `⏭️ Topic skipped successfully`,
-          type: "success",
-        });
+        setToast({ show: true, message: response.message || "Topic skipped", type: "info" });
       } else {
-        console.error("❌ Skip failed:", response?.message || "Unknown error");
-        setToast({
-          show: true,
-          message: `❌ Failed to skip topic: ${
-            response?.message || "Unknown error"
-          }`,
-          type: "error",
-        });
+        journalService._log("error", "topic-skip-failed", { topicId, message: response?.message });
+        setToast({ show: true, message: response?.message || "Failed to skip topic", type: "error" });
       }
     } catch (error) {
-      console.error("💥 Failed to skip topic:", error);
-      setToast({
-        show: true,
-        message: `❌ Network error: ${error.message}. Please try again.`,
-        type: "error",
-      });
+      journalService._log("error", "topic-skip-exception", { topicId, error: error.message });
+      setToast({ show: true, message: `Network error: ${error.message}`, type: "error" });
     } finally {
       setProcessingTopics((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(topicId);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(topicId);
+        return next;
       });
     }
   };
@@ -601,7 +591,7 @@ const Dashboard = () => {
             });
           }
         } catch (error) {
-          console.error("Failed to delete topic:", error);
+          journalService._log("error", "delete-topic-confirm failed", { error: error.message });
           setToast({
             show: true,
             message: "❌ Failed to delete topic",
@@ -627,12 +617,7 @@ const Dashboard = () => {
     if (!editingTopic) return;
 
     try {
-      console.log(
-        "✏️ Updating topic:",
-        editingTopic._id,
-        "New data:",
-        formData,
-      );
+      journalService._log("debug", "topic-edit-submit", { topicId: editingTopic._id });
 
       await updateTopic(editingTopic._id, formData);
 
@@ -651,7 +636,7 @@ const Dashboard = () => {
       setShowEditTopicModal(false);
       setEditingTopic(null);
     } catch (error) {
-      console.error("Failed to edit topic:", error);
+      journalService._log("error", "edit-topic failed", { error: error.message });
       setToast({
         show: true,
         message: "❌ Error updating topic",
@@ -663,9 +648,12 @@ const Dashboard = () => {
 
   // Handle fast review for upcoming topics
   const handleFastReview = async (topicId) => {
+    const startTime = reviewStartTimes.get(topicId) || Date.now();
+    const responseTime = Date.now() - startTime;
     try {
-      const response = await apiService.reviewTopic(topicId, 4); // Quality 4 = fast review
+      const response = await apiService.reviewTopic(topicId, 4, responseTime, 0, "scheduled", "flashcard");
       if (response.success) {
+        journalService._log("info", "fast-review-success", { topicId, responseTime });
         await recordStudySession();
         await fetchAllTopicsAndCalculate();
         setToast({
@@ -677,7 +665,7 @@ const Dashboard = () => {
         });
       }
     } catch (error) {
-      console.error("Failed to fast review topic:", error);
+      journalService._log("error", "fast-review failed", { error: error.message });
       setToast({
         show: true,
         message: "❌ Failed to fast review topic",
@@ -769,14 +757,14 @@ const Dashboard = () => {
         }
       }
     } catch (error) {
-      console.error("Failed to record study session:", error);
+      journalService._log("error", "record-study-session failed", { error: error.message });
     }
   };
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !user) {
-      console.log("User not authenticated, redirecting to login");
+      journalService._log("warn", "dashboard-redirect-login", {});
       navigate("/login");
     }
   }, [user, isLoading, navigate]);
@@ -801,12 +789,11 @@ const Dashboard = () => {
   // Fetch topics when user is available
   useEffect(() => {
     if (user) {
-      console.log("Dashboard - Current user object:", user);
-      console.log("Dashboard - Current user memScore:", user.memScore);
-      console.log(
-        "Dashboard - Has completed evaluation:",
-        user.hasCompletedEvaluation,
-      );
+      journalService._log("debug", "dashboard-user-loaded", {
+        userId: user.id,
+        memScore: user.memScore,
+        hasCompletedEvaluation: user.hasCompletedEvaluation,
+      });
 
       // Initialize journal service
       journalService.init();
@@ -974,7 +961,7 @@ const Dashboard = () => {
         type: "success",
       });
     } catch (error) {
-      console.error("Failed to create topic:", error);
+      journalService._log("error", "create-topic failed", { error: error.message });
       setToast({
         show: true,
         message: "❌ Failed to add topic",

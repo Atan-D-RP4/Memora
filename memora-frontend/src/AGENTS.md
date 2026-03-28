@@ -51,3 +51,17 @@ memora-frontend/src/
 - Main.jsx is the application entry point with router setup
 - Components directory has its own AGENTS.md for detailed component guidance
 - Pages directory contains route-level components that compose components/
+
+## Commands
+
+```bash
+# Development server
+bun run dev
+
+# Lint and build
+bun run lint
+bun run build
+
+# Preview production build
+bun run preview
+```

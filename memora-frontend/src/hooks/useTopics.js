@@ -145,10 +145,14 @@ export const useTopics = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.reviewTopic(id, {
+      const response = await apiService.reviewTopic(
+        id,
         quality,
         responseTime,
-      });
+        0,
+        "scheduled",
+        "flashcard",
+      );
       if (response.success) {
         // Remove from due topics and refresh lists
         setDueTopics((prev) => prev.filter((topic) => topic._id !== id));

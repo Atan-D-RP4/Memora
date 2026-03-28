@@ -8,6 +8,12 @@ class ApiService {
     this.token = localStorage.getItem("accessToken");
   }
 
+  _log(level, message, data = {}) {
+    const entry = { ts: new Date().toISOString(), level, module: "api", msg: message, ...(Object.keys(data).length > 0 ? { data } : {}) };
+    const fn = level === "error" ? console.error : level === "warn" ? console.warn : console.log;
+    fn(JSON.stringify(entry));
+  }
+
   // Set authentication token
   setToken(token) {
     this.token = token;
@@ -39,26 +45,16 @@ class ApiService {
       ...options,
     };
 
-    console.log("API Request:", {
-      url,
-      method: config.method || "GET",
-      headers: config.headers,
-      body: config.body,
-    });
+    this._log("debug", "api-request", { url, method: config.method || "GET" });
 
     try {
       const response = await fetch(url, config);
 
-      console.log("API Response Status:", {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-        url: response.url,
-      });
+      this._log("debug", "api-response-status", { status: response.status, ok: response.ok, url });
 
       const data = await response.json();
 
-      console.log("API Response Data:", data);
+      this._log("debug", "api-response-data", { url, success: data.success });
 
       if (!response.ok) {
         throw new Error(
@@ -68,11 +64,7 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error("API request failed:", {
-        error: error.message,
-        url,
-        config,
-      });
+      this._log("error", "api-request-failed", { error: error.message, url });
 
       // More specific error messages
       if (error.name === "TypeError" && error.message.includes("fetch")) {
@@ -135,7 +127,7 @@ class ApiService {
     try {
       await this.post("/auth/logout", { refreshToken });
     } catch (error) {
-      console.warn("Logout request failed:", error);
+      this._log("warn", "logout-request-failed", { error: error.message });
     } finally {
       this.setToken(null);
       localStorage.removeItem("refreshToken");
@@ -245,10 +237,7 @@ class ApiService {
   }
 
   async createTopic(topicData) {
-    console.log("API Service: Creating topic with data:", topicData);
-    const response = await this.post("/topics", topicData);
-    console.log("API Service: Create topic response:", response);
-    return response;
+    return this.post("/topics", topicData);
   }
 
   async getTopic(id) {
@@ -263,10 +252,13 @@ class ApiService {
     return this.delete(`/topics/${id}`);
   }
 
-  async reviewTopic(id, quality, responseTime = null) {
+  async reviewTopic(id, quality, responseTime = null, studyDuration = 0, reviewType = "scheduled", studyMode = "flashcard") {
     return this.post(`/topics/${id}/review`, {
       quality,
       responseTime,
+      studyDuration,
+      reviewType,
+      studyMode,
     });
   }
 

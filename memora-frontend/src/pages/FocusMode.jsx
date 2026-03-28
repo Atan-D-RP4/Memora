@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -10,13 +10,13 @@ import {
   Minimize,
   Pause,
   Play,
-  RotateCcw,
   Settings,
   Square,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTimer } from "../contexts/TimerContext";
 import Toast from "../components/Toast";
+import apiService from "../services/api";
 import journalService from "../services/journalService";
 
 const FocusMode = () => {
@@ -30,7 +30,6 @@ const FocusMode = () => {
     studyMethod,
     timeLeft,
     elapsedTime,
-    initialTime,
     startTimer,
     pauseTimer,
     stopTimer,
@@ -59,6 +58,7 @@ const FocusMode = () => {
       studyMethod: "pomodoro",
       customMinutes: 25,
       pomodoroSessions: 4,
+      selectedCategory: "all",
     };
   };
 
@@ -80,6 +80,7 @@ const FocusMode = () => {
     studyMethod: "pomodoro",
     customMinutes: 25,
     pomodoroSessions: 4,
+    selectedCategory: "all",
   };
 
   // Local state (non-timer related)
@@ -93,6 +94,9 @@ const FocusMode = () => {
   const [pomodoroSessions, setPomodoroSessions] = useState(
     defaultSettings.pomodoroSessions,
   );
+  const [availableTopics, setAvailableTopics] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [topicsLoading, setTopicsLoading] = useState(false);
 
   // Load settings when user changes (but don't reset running timer)
   useEffect(() => {
@@ -104,6 +108,7 @@ const FocusMode = () => {
       setGlobalStudyMethod(settings.studyMethod);
       setCustomMinutes(settings.customMinutes);
       setPomodoroSessions(settings.pomodoroSessions);
+      setSelectedCategory(settings.selectedCategory || "all");
 
       // Update timer based on loaded settings
       if (settings.timerMode === "countdown") {
@@ -116,16 +121,27 @@ const FocusMode = () => {
       // If timer is running or paused, just update the local UI state without affecting the timer
       setCustomMinutes(settings.customMinutes);
       setPomodoroSessions(settings.pomodoroSessions);
+      setSelectedCategory(settings.selectedCategory || "all");
     }
 
     // Always reload presets
     setSavedPresets(loadPresets());
+
+    // Load user-specific session history for this page
+    try {
+      const savedHistory = localStorage.getItem(getUserStorageKey("focus_sessions"));
+      setSessionHistory(savedHistory ? JSON.parse(savedHistory) : []);
+    } catch {
+      setSessionHistory([]);
+    }
   }, [user?.id]); // Only reload when user changes, not when timer state changes
 
   // Handle timer completion
   useEffect(() => {
     if (isCompleted && currentSessionData) {
-      console.log("Timer completed! Ending session...");
+      journalService._log("debug", "focus-timer-completed", {
+        sessionId: currentSessionData.id,
+      });
       // Use setTimeout to avoid potential infinite loops
       setTimeout(() => {
         endSession(true); // Mark as completed
@@ -136,6 +152,37 @@ const FocusMode = () => {
     }
   }, [isCompleted]);
 
+  // Load topics for category-based focus filtering
+  useEffect(() => {
+    const loadTopics = async () => {
+      if (!user?.id) return;
+      setTopicsLoading(true);
+      try {
+        const response = await apiService.getTopics({ limit: 200 });
+        if (response?.success) {
+          setAvailableTopics(response.topics || []);
+        }
+      } catch (error) {
+        journalService._log("error", "focus-load-topics-failed", {
+          error: error.message,
+        });
+      } finally {
+        setTopicsLoading(false);
+      }
+    };
+
+    loadTopics();
+  }, [user?.id]);
+
+  const availableCategories = [
+    "all",
+    ...new Set((availableTopics || []).map((topic) => topic.category).filter(Boolean)),
+  ];
+
+  const filteredTopics = selectedCategory === "all"
+    ? availableTopics
+    : availableTopics.filter((topic) => topic.category === selectedCategory);
+
   // Save settings to localStorage (user-specific)
   const saveSettings = () => {
     const settings = {
@@ -143,6 +190,7 @@ const FocusMode = () => {
       studyMethod,
       customMinutes,
       pomodoroSessions,
+      selectedCategory,
     };
     localStorage.setItem(
       getUserStorageKey("focusModeSettings"),
@@ -159,6 +207,7 @@ const FocusMode = () => {
       studyMethod,
       customMinutes,
       pomodoroSessions,
+      selectedCategory,
       createdAt: new Date(),
     };
     const updatedPresets = [...savedPresets, preset];
@@ -197,6 +246,7 @@ const FocusMode = () => {
     setGlobalStudyMethod(preset.studyMethod);
     setCustomMinutes(preset.customMinutes);
     setPomodoroSessions(preset.pomodoroSessions);
+    setSelectedCategory(preset.selectedCategory || "all");
     setActivePreset(preset); // Track the active preset
 
     // Update timer based on loaded preset
@@ -246,9 +296,6 @@ const FocusMode = () => {
     message: "",
     type: "success",
   });
-  const intervalRef = useRef(null);
-  const startTimeRef = useRef(null);
-  const pausedTimeRef = useRef(null);
 
   // Toast helper function
   const showToast = (message, type = "success") => {
@@ -308,6 +355,11 @@ const FocusMode = () => {
       // Log to journal if session was completed and lasted more than 1 minute
       if (completed && finalSession.duration > 60000) {
         journalService.logFocusSession(finalSession.duration);
+        apiService.recordStudySession().catch((error) => {
+          journalService._log("error", "focus-record-study-session-failed", {
+            error: error.message,
+          });
+        });
       }
 
       const updatedHistory = [finalSession, ...sessionHistory.slice(0, 19)]; // Keep last 20 sessions
@@ -316,11 +368,13 @@ const FocusMode = () => {
       // Save to localStorage for Analytics
       try {
         localStorage.setItem(
-          "focus_sessions_harsith",
+          getUserStorageKey("focus_sessions"),
           JSON.stringify(updatedHistory),
         );
       } catch (error) {
-        console.warn("Failed to save session history:", error);
+        journalService._log("warn", "focus-save-session-history-failed", {
+          error: error.message,
+        });
       }
 
       setCurrentSessionData(null);
@@ -387,6 +441,11 @@ const FocusMode = () => {
   };
 
   const handleStartTimer = () => {
+    if (selectedCategory !== "all" && filteredTopics.length === 0) {
+      showToast("No topics found in the selected category.", "error");
+      return;
+    }
+
     startTimer(); // Use global timer function
 
     // Start new session or resume existing one
@@ -440,21 +499,6 @@ const FocusMode = () => {
 
   const increaseTime = () => adjustTime(1);
   const decreaseTime = () => adjustTime(-1);
-
-  const resetTimer = () => {
-    // End current session if exists
-    if (currentSessionData) {
-      endSession(false); // Reset = not completed
-    }
-
-    // Use global reset timer function
-    globalResetTimer();
-
-    // Reset Pomodoro session if needed
-    if (studyMethod === "pomodoro") {
-      setCurrentPhase("study");
-    }
-  };
 
   const changeStudyMethod = (method) => {
     // Prevent changing method while timer is actively running
@@ -521,26 +565,23 @@ const FocusMode = () => {
 
   // Use global timer's getCurrentTime function
 
-  // Calculate progress for visual indicator
-  const progress = timerMode === "countdown" && initialTime > 0
-    ? ((initialTime - timeLeft) / initialTime) * 100
-    : timerMode === "stopwatch" && initialTime > 0
-    ? Math.min((elapsedTime / initialTime) * 100, 100)
-    : 0;
-
   // Fullscreen functionality
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
         setIsFullscreen(true);
       }).catch((err) => {
-        console.log("Error attempting to enable fullscreen:", err);
+        journalService._log("warn", "focus-fullscreen-enable-failed", {
+          error: err.message,
+        });
       });
     } else {
       document.exitFullscreen().then(() => {
         setIsFullscreen(false);
       }).catch((err) => {
-        console.log("Error attempting to exit fullscreen:", err);
+        journalService._log("warn", "focus-fullscreen-exit-failed", {
+          error: err.message,
+        });
       });
     }
   };
@@ -770,6 +811,29 @@ const FocusMode = () => {
 
             {/* Configuration Options */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-white">
+                  Focus Category
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  disabled={isRunning || topicsLoading}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-white disabled:opacity-50"
+                >
+                  {availableCategories.map((category) => (
+                    <option key={category} value={category} className="bg-black text-white">
+                      {category === "all" ? "All Categories" : category}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  {topicsLoading
+                    ? "Loading topics..."
+                    : `${filteredTopics.length} topic(s) in current focus scope`}
+                </p>
+              </div>
+
               {studyMethod === "pomodoro" && (
                 <div>
                   <label className="block text-sm font-medium mb-2 text-white">
@@ -946,6 +1010,9 @@ const FocusMode = () => {
                     {customMinutes} minutes
                   </div>
                 )}
+                <div className="text-xs text-gray-400">
+                  Focus: {selectedCategory === "all" ? "All Categories" : selectedCategory}
+                </div>
               </div>
             </div>
 
@@ -1082,6 +1149,8 @@ const FocusMode = () => {
                                   <span>{preset.customMinutes} min</span>
                                 </>
                               )}
+                              <span>•</span>
+                              <span>{preset.selectedCategory || "all"}</span>
                             </div>
                           </div>
                         </div>
@@ -1279,7 +1348,10 @@ const FocusMode = () => {
             {sessionHistory.length > 0 && (
               <div className="flex justify-between mt-6 pt-4 border-t border-white/10">
                 <button
-                  onClick={() => setSessionHistory([])}
+                  onClick={() => {
+                    setSessionHistory([]);
+                    localStorage.removeItem(getUserStorageKey("focus_sessions"));
+                  }}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
                 >
                   Clear History
@@ -1343,6 +1415,12 @@ const FocusMode = () => {
               Session {currentSession}/{pomodoroSessions}
             </div>
           )}
+
+          <div className="px-3 py-1.5 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            {selectedCategory === "all"
+              ? `All Categories • ${filteredTopics.length} topics`
+              : `${selectedCategory} • ${filteredTopics.length} topics`}
+          </div>
         </div>
 
         {/* Digital Clock Display - Massive in Fullscreen */}
@@ -1370,6 +1448,29 @@ const FocusMode = () => {
             )}
           </div>
         </div>
+
+        {!isFullscreen && (
+          <div className="mb-6 w-full max-w-2xl bg-white/5 border border-white/10 rounded-lg p-3">
+            <div className="text-xs text-gray-400 mb-2">
+              Focus Scope ({selectedCategory === "all" ? "All Categories" : selectedCategory})
+            </div>
+            {filteredTopics.length === 0
+              ? (
+                <div className="text-sm text-gray-500">
+                  No topics available in this category.
+                </div>
+              )
+              : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {filteredTopics.slice(0, 6).map((topic) => (
+                    <div key={topic._id} className="text-sm text-white truncate border border-white/10 rounded px-2 py-1">
+                      {topic.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+          </div>
+        )}
 
         {/* Control Buttons - Smaller in Fullscreen */}
         <div
