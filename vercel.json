@@ -1,32 +1,19 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "memora-backend/api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["memora-backend/**"]
-      }
-    },
-    {
-      "src": "memora-frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "installCommand": "cd memora-frontend && npm install --include=dev",
+  "buildCommand": "cd memora-frontend && npx vite build",
+  "outputDirectory": "memora-frontend/dist",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "memora-backend/api/index.js"
+      "dest": "/api/index"
     },
     {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "memora-frontend/index.html"
+      "dest": "/index.html"
     }
   ]
 }
