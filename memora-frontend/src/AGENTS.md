@@ -1,7 +1,7 @@
 # FRONTEND SOURCE - React Application
 
-**Scope**: Frontend source directory `memora-frontend/src` **Generated**:
-2025-01-21
+**Scope**: Frontend source directory `memora-frontend/src`
+**Generated**: 2026-03-30
 
 ## Overview
 
@@ -71,3 +71,5 @@ bun run preview
 
 - Frontend service layer defaults to `"/api"` in production (`VITE_API_URL` can override).
 - Root `vercel.json` handles API routing to backend serverless entrypoint and SPA fallback to `index.html`.
+- Build output goes to `memora-frontend/dist/` (configured in vercel.json `outputDirectory`).
+- Vite and dev dependencies must be installed with `--include=dev` flag for Vercel builds.

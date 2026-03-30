@@ -1,24 +1,25 @@
 # BACKEND KNOWLEDGE BASE
 
-**Generated:** 2025-01-21 **Commit:** main **Branch:** main
+**Generated:** 2026-03-30 **Commit:** main **Branch:** main
 
 ## OVERVIEW
 
-Express.js REST API with MongoDB, JWT auth, and SM-2 spaced repetition
-algorithm.
+Express.js REST API with MongoDB, JWT auth, and SM-2 spaced repetition algorithm.
 
 ## STRUCTURE
 
 ```
 memora-backend/
-├── config/          # Configuration files
-├── middleware/      # Custom Express middleware
-├── models/          # Mongoose ODM schemas
-├── routes/          # API route handlers by feature
+├── api/              # Legacy serverless entrypoint (not used - see root api/)
+├── config/           # Configuration files
+├── middleware/       # Custom Express middleware
+├── models/           # Mongoose ODM schemas
+├── routes/           # API route handlers by feature
 ├── scripts/         # Database utility scripts
 ├── uploads/         # File upload storage
 ├── utils/           # JWT token utilities
-└── server.js        # Express server entry point
+├── app.js           # Express app (shared between local and serverless)
+└── server.js        # Local development server entry point
 ```
 
 ## WHERE TO LOOK
@@ -33,15 +34,12 @@ memora-backend/
 
 ## CONVENTIONS
 
-- **Routes**: Feature-based files (auth.js, user.js, topics.js), RESTful
-  patterns
+- **Routes**: Feature-based files (auth.js, user.js, topics.js), RESTful patterns
 - **Auth**: JWT with access (15min) and refresh (7 days) token rotation
-- **Responses**: { success: boolean, message: string, data?: any, errors?: array
-  }
+- **Responses**: { success: boolean, message: string, data?: any, errors?: array }
 - **Validation**: express-validator arrays before route handlers
 - **Database**: Mongoose ODM with schema methods for complex queries
-- **Error handling**: Try-catch blocks, console.error logging, development error
-  messages
+- **Error handling**: Try-catch blocks, console.error logging, development error messages
 
 ## ANTI-PATTERNS
 
@@ -55,7 +53,7 @@ memora-backend/
 - Runs on port 3001 (not 3000 as parent docs state)
 - Token secrets required in .env (JWT_SECRET, JWT_REFRESH_SECRET)
 - Helmet.js security headers configured
-- CORS allows localhost:5173, devtunnels, and FRONTEND_URL
+- CORS allows localhost:5173, devtunnels, and FRONTEND_URL (includes vercel.app domains)
 - Multer deprecation warning: req.file deprecated, use req.files
 
 ## COMMANDS
@@ -73,6 +71,14 @@ bun run test
 
 ## DEPLOYMENT (VERCEL)
 
-- `memora-backend/api/index.js` exports the Express app for Vercel serverless runtime.
-- `memora-backend/app.js` contains shared app wiring used by both local server and serverless entrypoint.
-- Set `JWT_SECRET`, `JWT_REFRESH_SECRET`, and `MONGODB_URI` in Vercel environment settings.
+**IMPORTANT**: For Vercel deployment, the serverless entrypoint is at the **project root** (`api/index.js`), not in `memora-backend/`.
+
+- `api/index.js` (root level) - Serverless handler that imports from `memora-backend/app.js`
+- `memora-backend/app.js` - Contains shared app wiring used by both local server and serverless
+
+Required environment variables (set in Vercel dashboard):
+- `MONGODB_URI` - MongoDB Atlas connection string
+- `JWT_SECRET` - Access token secret (min 32 chars)
+- `JWT_REFRESH_SECRET` - Refresh token secret (min 32 chars)
+- `NODE_ENV` - Set to `production`
+- `FRONTEND_URL` - Your Vercel frontend URL (for CORS)
