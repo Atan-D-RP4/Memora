@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "memora-backend/api/index.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["memora-backend/**"]
+      }
     },
     {
       "src": "memora-frontend/package.json",
@@ -23,7 +26,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "memora-frontend/index.html"
     }
   ]
 }

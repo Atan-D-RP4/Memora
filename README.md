@@ -197,6 +197,108 @@ FRONTEND_URL=http://localhost:5173
 BCRYPT_SALT_ROUNDS=12
 ```
 
+## 🚢 Deploying to Vercel
+
+### Prerequisites
+1. A [Vercel](https://vercel.com) account
+2. A [MongoDB Atlas](https://www.mongodb.com/atlas) cluster (free tier available)
+3. Git repository connected to Vercel
+
+### Step 1: Set Up MongoDB Atlas
+1. Create a free cluster on MongoDB Atlas
+2. Create a database user with read/write permissions
+3. Whitelist `0.0.0.0/0` in Network Access (or Vercel's IP ranges)
+4. Get your connection string (looks like `mongodb+srv://username:password@cluster.mongodb.net/memora`)
+
+### Step 2: Configure Environment Variables in Vercel
+Add these environment variables in your Vercel project settings:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://user:pass@cluster.mongodb.net/memora` |
+| `JWT_SECRET` | Secret key for access tokens (min 32 chars) | `your-super-secret-jwt-key-here-at-least-32-chars` |
+| `JWT_REFRESH_SECRET` | Secret key for refresh tokens (min 32 chars) | `your-super-secret-refresh-key-here-at-least-32-chars` |
+| `FRONTEND_URL` | Your Vercel frontend URL | `https://your-app.vercel.app` |
+| `NODE_ENV` | Set to `production` | `production` |
+
+### Step 3: Deploy to Vercel
+
+1. **Import your repository** in Vercel dashboard
+2. **Configure build settings**:
+   - Framework Preset: `Other`
+   - Build Command: `cd memora-frontend && npm install && npm run vercel-build`
+   - Output Directory: `memora-frontend/dist`
+   - Install Command: `npm install`
+
+3. **Deploy**: Vercel will automatically build and deploy your application
+
+### Project Structure for Vercel
+The project uses a monorepo structure with:
+- **Frontend**: Built as a static site using `@vercel/static-build`
+- **Backend**: Deployed as serverless functions using `@vercel/node`
+- **Routing**: `/api/*` routes to backend, everything else to frontend SPA
+
+### Vercel Configuration (vercel.json)
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "memora-backend/api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "memora-frontend/package.json",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "memora-backend/api/index.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "memora-frontend/$1" }
+  ]
+}
+```
+
+### Known Limitations on Vercel
+
+#### File Uploads
+The file upload feature (`/api/doctags/upload`) does **not** work in Vercel's serverless environment because:
+- Serverless functions have read-only filesystems (except `/tmp`)
+- Uploaded files don't persist between function invocations
+
+**Solution**: For production file uploads, integrate a cloud storage service:
+- [Vercel Blob Storage](https://vercel.com/docs/storage/vercel-blob)
+- [AWS S3](https://aws.amazon.com/s3/)
+- [Cloudinary](https://cloudinary.com)
+- [Uploadcare](https://uploadcare.com)
+
+#### Cold Starts
+Serverless functions may experience cold starts (1-3 seconds delay on first request). This is normal for:
+- First request after deployment
+- Requests after periods of inactivity
+
+### Troubleshooting
+
+**Build fails with "Cannot find module"**
+- Ensure all dependencies are in `package.json`, not just `devDependencies`
+- Run `npm install` in both `memora-frontend` and `memora-backend`
+
+**API returns 503 "Database connection failed"**
+- Verify `MONGODB_URI` is correctly set in Vercel environment variables
+- Check MongoDB Atlas network access allows Vercel's IP ranges
+- Ensure database user has correct permissions
+
+**CORS errors in production**
+- Verify `FRONTEND_URL` matches your actual Vercel deployment URL
+- Check that the URL doesn't have trailing slashes
+- Preview deployments (`.vercel.app`) are automatically allowed
+
+**Environment variables not loading**
+- After adding/changing env vars in Vercel, you must redeploy
+- Environment variables are not available during build time for the backend
+- Use `process.env.VARIABLE_NAME` in backend code
+
 ## 🗄️ Database Schema
 
 ### User Collection
